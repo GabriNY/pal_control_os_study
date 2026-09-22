@@ -1,0 +1,46 @@
+/*
+ * ARCHIVO: 02_pairs/14_fifo_dup2/main.c
+ * TEMAS: FIFO (named pipe), dup2(), execv()
+ *
+ * RELACIÓN DENTRO DEL EJEMPLO:
+ * el FIFO comunica procesos mediante una ruta visible en /tmp; dup2 redirige un descriptor heredado a STDIN/STDOUT; execv reemplaza el programa actual sin crear un PID nuevo.
+ *
+ * REGLA DE ESTUDIO: identifica primero quién crea el recurso, quién escribe,
+ * quién lee, qué descriptores se heredan y qué proceso cambia con execv().
+ */
+
+/* Cabeceras necesarias para E/S, procesos, señales e IPC usados por este archivo. */
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <errno.h>
+#define FIFO "/tmp/pair_fifo_dup2"
+/* Punto de entrada del programa; desde aquí se crean recursos y se organiza el flujo del ejemplo. */
+int main(void) {
+    /* Crea el FIFO con nombre. Si ya existe, EEXIST no debe considerarse un error fatal. */
+    if (mkfifo(FIFO, 0666) == -1 && errno != EEXIST) {
+        /* Muestra el motivo del último error del sistema usando errno; facilita depurar la llamada que falló. */
+        perror("mkfifo");
+        return 1;
+    }
+    printf("En otra terminal: echo hola > %s\n", FIFO);
+    /* Abre el canal por lectura. En un FIFO puede bloquear hasta que exista un escritor. */
+    int f = open(FIFO, O_RDONLY);
+    if (f == -1) {
+        /* Muestra el motivo del último error del sistema usando errno; facilita depurar la llamada que falló. */
+        perror("open");
+        return 1;
+    }
+    /* Redirige un descriptor conocido (normalmente STDIN=0 o STDOUT=1) hacia el recurso indicado. */
+    if (dup2(f, STDIN_FILENO) == -1) {
+        /* Muestra el motivo del último error del sistema usando errno; facilita depurar la llamada que falló. */
+        perror("dup2");
+        return 1;
+    }
+    /* Cierra un descriptor que ya no se usa; esto evita fugas y ayuda a que los lectores detecten EOF. */
+    close(f);
+    char b[128];
+    if (fgets(b, sizeof(b), stdin))printf("stdin ahora viene del FIFO: %s", b);
+    return 0;
+}

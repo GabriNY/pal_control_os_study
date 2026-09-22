@@ -1,0 +1,77 @@
+PAQUETE DE ESTUDIO - CONTROL DE SISTEMAS OPERATIVOS
+===================================================
+
+Este paquete está preparado para estudiar por capas, no para memorizar programas.
+Todos los .c fueron ordenados/indentados y contienen comentarios explicativos de
+los bloques más importantes: señales, FIFO, Message Queue, pipe, fork, dup2,
+execv, herencia de descriptores, close(), read()/write() y sincronización.
+
+RUTA DE ESTUDIO RECOMENDADA
+---------------------------
+1. 00_codigos_usuario/
+   Tus dos variantes principales:
+   a) Pipe + fork + dup2 + execv -> programa2 lee STDIN.
+   b) Pipe + fork + execv pasando fd por argv -> programa3 comprueba FD_CLOEXEC.
+
+2. 01_basics/
+   Revisa una pieza por vez.
+
+3. 02_pairs/
+   Combinaciones de 2 temas.
+
+4. 03_triples/
+   Combinaciones de 3 temas.
+
+5. 04_quads/
+   Combinaciones de 4 temas.
+
+6. 05_all_topics/
+   Cadena integral.
+
+7. 06_lab_style/
+   Patrón de sigsetjmp/siglongjmp + Message Queue trabajado en laboratorio.
+
+8. 07_controles_simulados/
+   Aquí está la práctica más importante antes del examen:
+   - ANALISIS_DEL_CONTROL_MODELO.txt
+   - CONTROLES_SIMULADOS_COMPLETOS.txt
+   - 6 controles separados con ENUNCIADO.txt y solucion/
+   - PRUEBAS_DE_EJECUCION.txt con evidencia de que los 6 flujos terminaron OK.
+
+COMPILACIÓN
+-----------
+Lee primero:
+    COMPILACION_Y_EJECUCION_COMPLETA.txt
+
+Cada carpeta que contiene .c también posee:
+    COMPILACION_Y_EJECUCION.txt
+
+Para verificar que toda la colección compila:
+    chmod +x build_all.sh
+    ./build_all.sh
+
+El archivo BUILD_VERIFICATION.txt registra la última comprobación general.
+
+COMANDO BASE
+------------
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic archivo.c -o ejecutable
+
+REGLA MENTAL PARA EL EXAMEN
+---------------------------
+Antes de escribir código, dibuja:
+
+EVENTO (Signal)
+      |
+      v
+QUIÉN ENVÍA
+      |
+      v
+CANAL IPC (FIFO / MQ / Pipe)
+      |
+      v
+QUIÉN RECIBE
+      |
+      v
+fork / dup2 / execv si corresponde
+
+Después anota al lado de cada proceso qué descriptores debe cerrar.

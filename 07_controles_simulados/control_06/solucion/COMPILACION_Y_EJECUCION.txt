@@ -1,0 +1,47 @@
+COMPILACIÓN Y EJECUCIÓN - 07_controles_simulados/control_06/solucion
+===================================================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- proceso_a.c -> ejecutable ./proceso_a
+- proceso_c.c -> ejecutable ./proceso_c
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Clave Message Queue: 0x6106
+- Señales usadas: SIGINT, SIGTRAP
+- Ejecutables referenciados por argv/execv: ./proceso_c
+- Tipos de mensaje visibles: 7
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Abre una terminal y entra en esta carpeta solucion/.
+2. Compila proceso_c ANTES de ejecutar proceso_a, porque proceso_a/Clon B lo invoca con execv().
+3. Ejecuta: ./proceso_a
+4. Copia el PID que imprime A y envía las señales indicadas en ENUNCIADO.txt desde otra terminal.
+6. Observa qué proceso imprime cada recepción y verifica que el programa termine sin quedar bloqueado.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

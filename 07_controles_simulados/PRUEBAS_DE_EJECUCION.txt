@@ -1,0 +1,57 @@
+===== control_01 =====
+RESULTADO: OK
+[B PID=3030] MQ type=2: Mensaje generado por A después de SIGINT
+[C PID=3031] Pipe fd=3: Mensaje generado por A después de SIGTRAP
+[A PID=3028]
+  kill -INT  3028  -> Message Queue hacia B
+  kill -TRAP 3028  -> Pipe hacia C
+[A] SIGINT -> MQ -> B
+[A] SIGTRAP -> Pipe -> C
+
+===== control_02 =====
+RESULTADO: OK
+[B PID=3038] recibido por Pipe: A envia por Pipe al proceso B
+[C PID=3039] MQ type=5: A envia por Message Queue al proceso C
+[A PID=3036]
+  kill -USR1 3036 -> Pipe -> B
+  kill -USR2 3036 -> MQ type=5 -> C
+
+===== control_03 =====
+RESULTADO: OK
+[B PID=3046] MQ: Evento SIGINT para B
+[C PID=3047] leído desde STDIN después de dup2: Evento SIGUSR1 recibido por C mediante STDIN
+[A PID=3044]
+  kill -INT  3044 -> MQ -> B
+  kill -USR1 3044 -> Pipe -> STDIN -> C
+
+===== control_04 =====
+RESULTADO: OK
+[B PID=3054] MQ type=1: dato prueba fifo
+[B PID=3054] MQ type=2: estado generado internamente por A
+[C PID=3055] STDIN/Pipe: type=1 | dato prueba fifo
+[C PID=3055] STDIN/Pipe: type=2 | estado generado internamente por A
+[A PID=3052]
+Evento 1: kill -USR1 3052
+          luego: echo 'dato desde FIFO' > /tmp/control04_fifo
+Evento 2: kill -USR2 3052
+
+===== control_05 =====
+RESULTADO: OK
+[B PID=3064] recibido: Solicitud de A para B
+[C PID=3065] Pipe: Solicitud de A para C por Pipe
+[A PID=3062]
+  kill -INT  3062 -> B; B responde ACK por MQ
+  kill -TRAP 3062 -> C; C responde SIGUSR1
+[A] ACK de B: Message Queue recibida correctamente
+[A] ACK de C recibido como SIGUSR1
+
+===== control_06 =====
+RESULTADO: OK
+[Clon B] fd=3 antes de execv: FD_CLOEXEC DESACTIVADO
+[B PID=3072] MQ: Mensaje para B en control FD_CLOEXEC
+[C PID=3073] fd=3 después de execv: FD_CLOEXEC DESACTIVADO
+[C] recibido: El descriptor sobrevivió al execv si C puede leer esto
+[A PID=3070]
+  kill -INT  3070 -> MQ type=7 -> B
+  kill -TRAP 3070 -> Pipe -> C
+

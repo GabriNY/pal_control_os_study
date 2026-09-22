@@ -1,0 +1,47 @@
+CÓDIGOS ORIGINALES DEL USUARIO - COMPILACIÓN Y EJECUCIÓN
+========================================================
+
+VARIANTE A: Pipe + fork + dup2 + execv
+--------------------------------------
+1. Compilar primero el programa que será destino de execv:
+   gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa2.c -o programa2
+
+2. Compilar el padre:
+   gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa1_dup2.c -o programa1_dup2
+
+3. Ejecutar SOLO el padre:
+   ./programa1_dup2
+
+4. Secuencia interna:
+   programa1_dup2 crea pipe -> fork -> hijo cierra fd[1] -> dup2(fd[0],0)
+   -> hijo cierra fd[0] -> execv("./programa2") -> programa2 hace read(0,...).
+   Paralelamente el padre cierra fd[0] -> write(fd[1],...) -> close -> waitpid.
+
+5. Salida esperada:
+   Programa 2 recibió: Hola desde el proceso padre
+
+VARIANTE B: Pipe + fork + descriptor por argv + execv
+-----------------------------------------------------
+1. Compilar el receptor del descriptor:
+   gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa3.c -o programa3
+
+2. Compilar el padre:
+   gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa1_fd_argv.c -o programa1_fd_argv
+
+3. Ejecutar SOLO el padre:
+   ./programa1_fd_argv
+
+4. Secuencia interna:
+   programa1_fd_argv crea pipe -> fork -> hijo conserva fd[0] -> convierte fd[0] a texto
+   -> execv("./programa3", {"./programa3", "3", NULL}) -> programa3 ejecuta atoi(argv[1])
+   -> fcntl(fd,F_GETFD) -> read(fd,...).
+
+5. Qué demuestra FD_CLOEXEC:
+   - DESACTIVADO: execv conserva el descriptor y programa3 puede leerlo.
+   - ACTIVADO: el kernel cierra el descriptor al ejecutar execv y programa3 no podrá leerlo.
+
+IMPORTANTE
+----------
+- programa2 y programa3 deben existir en la MISMA carpeta desde la que se ejecuta el padre,
+  porque los ejemplos usan rutas relativas ./programa2 y ./programa3.
+- No ejecutes programa2 o programa3 manualmente en estas variantes: execv los inicia automáticamente.

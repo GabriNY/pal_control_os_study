@@ -1,0 +1,307 @@
+GUÍA MAESTRA DE COMPILACIÓN Y EJECUCIÓN - TODOS LOS CÓDIGOS
+============================================================
+
+Regla general de compilación usada en toda la colección:
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic archivo.c -o ejecutable
+
+Por qué se usan estas opciones:
+- -std=c11: fija el estándar del lenguaje C.
+- -D_POSIX_C_SOURCE=200809L: habilita interfaces POSIX usadas por sigaction, procesos e IPC.
+- -Wall -Wextra -pedantic: muestra advertencias útiles antes del examen.
+
+PROCESO MENTAL ANTES DE EJECUTAR CUALQUIER EJEMPLO
+----------------------------------------------------
+1. Compila TODOS los .c que estén en la carpeta, especialmente los destinos de execv().
+2. Decide qué programa debe arrancar primero: normalmente receptor antes que emisor; padre/launcher antes de enviar señales.
+3. Identifica los bloqueos esperados: pause espera señal, msgrcv espera mensaje, read espera bytes, FIFO puede esperar el otro extremo y wait espera al hijo.
+4. Si hay fork, recuerda que los descriptores abiertos antes del fork son heredados.
+5. Si hay execv, el proceso no se duplica: el mismo PID cambia de programa.
+6. Si hay dup2(fd, STDIN_FILENO), el programa ejecutado puede leer con read(0,...) o fgets(stdin,...) sin conocer el fd original.
+7. Envía señales desde otra terminal con kill -USR1 PID, kill -USR2 PID, kill -INT PID o kill -TRAP PID según el ejercicio.
+8. Para FIFO, usa otra terminal y echo "texto" > /tmp/ruta cuando el lector ya esté esperando.
+9. Para Message Queue, usa ipcs -q para observar colas y evita dejar recursos huérfanos.
+
+ÍNDICE Y COMANDOS POR EJEMPLO
+-----------------------------
+
+### 00_codigos_usuario
+Temas: pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa1_dup2.c -o programa1_dup2
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa1_fd_argv.c -o programa1_fd_argv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa2.c -o programa2
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic programa3.c -o programa3
+Guía detallada: 00_codigos_usuario/COMPILACION_Y_EJECUCION.txt
+
+### 01_basics
+Temas: signal, sigjmp, fifo, msgq, pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 01_signal_flags.c -o 01_signal_flags
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 02_signal_sigjmp.c -o 02_signal_sigjmp
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 03_fifo_writer.c -o 03_fifo_writer
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 04_fifo_reader.c -o 04_fifo_reader
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 05_msg_sender.c -o 05_msg_sender
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 06_msg_receiver.c -o 06_msg_receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 07_pipe_fork.c -o 07_pipe_fork
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 08_dup2_exec_child.c -o 08_dup2_exec_child
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 08_dup2_exec_parent.c -o 08_dup2_exec_parent
+Guía detallada: 01_basics/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/01_signal_msgq
+Temas: signal, msgq, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic sender.c -o sender
+Guía detallada: 02_pairs/01_signal_msgq/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/02_signal_fifo
+Temas: signal, fifo, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/02_signal_fifo/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/03_signal_pipe
+Temas: signal, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/03_signal_pipe/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/04_signal_fork
+Temas: signal, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/04_signal_fork/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/05_signal_dup2
+Temas: signal, fifo, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/05_signal_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/06_signal_execv
+Temas: signal, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic target.c -o target
+Guía detallada: 02_pairs/06_signal_execv/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/07_msgq_fifo
+Temas: fifo, msgq, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic bridge.c -o bridge
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+Guía detallada: 02_pairs/07_msgq_fifo/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/08_msgq_pipe
+Temas: msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/08_msgq_pipe/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/09_msgq_fork
+Temas: msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/09_msgq_fork/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/10_msgq_dup2
+Temas: fifo, msgq, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/10_msgq_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/11_msgq_execv
+Temas: msgq, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic printer.c -o printer
+Guía detallada: 02_pairs/11_msgq_execv/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/12_fifo_pipe
+Temas: fifo, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/12_fifo_pipe/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/13_fifo_fork
+Temas: fifo, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/13_fifo_fork/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/14_fifo_dup2
+Temas: fifo, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/14_fifo_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/15_fifo_execv
+Temas: fifo, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic launcher.c -o launcher
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic reader.c -o reader
+Guía detallada: 02_pairs/15_fifo_execv/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/16_pipe_fork
+Temas: pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/16_pipe_fork/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/17_pipe_dup2
+Temas: pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/17_pipe_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/18_pipe_execv
+Temas: pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic launcher.c -o launcher
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic reader.c -o reader
+Guía detallada: 02_pairs/18_pipe_execv/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/19_fork_dup2
+Temas: fifo, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/19_fork_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/20_fork_execv
+Temas: fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic target.c -o target
+Guía detallada: 02_pairs/20_fork_execv/COMPILACION_Y_EJECUCION.txt
+
+### 02_pairs/21_dup2_execv
+Temas: fifo, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 02_pairs/21_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/01_signal_fifo_msgq
+Temas: signal, fifo, msgq, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic bridge.c -o bridge
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+Guía detallada: 03_triples/01_signal_fifo_msgq/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/02_signal_pipe_fork
+Temas: signal, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 03_triples/02_signal_pipe_fork/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/03_signal_fork_execv
+Temas: signal, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic target.c -o target
+Guía detallada: 03_triples/03_signal_fork_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/04_pipe_fork_dup2
+Temas: pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 03_triples/04_pipe_fork_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/05_pipe_dup2_execv
+Temas: pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic reader.c -o reader
+Guía detallada: 03_triples/05_pipe_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/06_fork_dup2_execv
+Temas: fifo, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 03_triples/06_fork_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/07_fifo_dup2_execv
+Temas: fifo, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic reader.c -o reader
+Guía detallada: 03_triples/07_fifo_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/08_msgq_fork_execv
+Temas: msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic printer.c -o printer
+Guía detallada: 03_triples/08_msgq_fork_execv/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/09_msgq_pipe_fork
+Temas: msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 03_triples/09_msgq_pipe_fork/COMPILACION_Y_EJECUCION.txt
+
+### 03_triples/10_signal_msgq_fork
+Temas: signal, msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 03_triples/10_signal_msgq_fork/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/01_signal_fifo_msgq_fork
+Temas: signal, fifo, msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 04_quads/01_signal_fifo_msgq_fork/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/02_signal_pipe_fork_dup2
+Temas: signal, pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 04_quads/02_signal_pipe_fork_dup2/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/03_pipe_fork_dup2_execv
+Temas: pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic child.c -o child
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic parent.c -o parent
+Guía detallada: 04_quads/03_pipe_fork_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/04_fifo_fork_dup2_execv
+Temas: fifo, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic reader.c -o reader
+Guía detallada: 04_quads/04_fifo_fork_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/05_msgq_fork_dup2_execv
+Temas: fifo, msgq, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic printer.c -o printer
+Guía detallada: 04_quads/05_msgq_fork_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/06_signal_fork_dup2_execv
+Temas: signal, fifo, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+Guía detallada: 04_quads/06_signal_fork_dup2_execv/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/07_fifo_msgq_fork_execv
+Temas: fifo, msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic printer.c -o printer
+Guía detallada: 04_quads/07_fifo_msgq_fork_execv/COMPILACION_Y_EJECUCION.txt
+
+### 04_quads/08_signal_msgq_fork_execv
+Temas: signal, msgq, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic printer.c -o printer
+Guía detallada: 04_quads/08_signal_msgq_fork_execv/COMPILACION_Y_EJECUCION.txt
+
+### 05_all_topics
+Temas: signal, fifo, msgq, pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic launcher.c -o launcher
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic worker.c -o worker
+Guía detallada: 05_all_topics/COMPILACION_Y_EJECUCION.txt
+
+### 06_lab_style
+Temas: signal, sigjmp, msgq, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic signal_sigjmp_msgq_emitter.c -o signal_sigjmp_msgq_emitter
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic signal_sigjmp_msgq_receiver.c -o signal_sigjmp_msgq_receiver
+Guía detallada: 06_lab_style/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_01/solucion
+Temas: signal, msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_01/solucion/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_02/solucion
+Temas: signal, msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_02/solucion/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_03/solucion
+Temas: signal, msgq, pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_03/solucion/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_04/solucion
+Temas: signal, fifo, msgq, pipe, fork, dup2, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_04/solucion/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_05/solucion
+Temas: signal, msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_05/solucion/COMPILACION_Y_EJECUCION.txt
+
+### 07_controles_simulados/control_06/solucion
+Temas: signal, msgq, pipe, fork, execv
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_a.c -o proceso_a
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic proceso_c.c -o proceso_c
+Guía detallada: 07_controles_simulados/control_06/solucion/COMPILACION_Y_EJECUCION.txt

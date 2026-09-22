@@ -1,0 +1,41 @@
+ANÁLISIS DEL CONTROL MODELO ENTREGADO
+====================================
+
+La estructura evaluada tiene cuatro dimensiones principales:
+
+1. JERARQUÍA DE PROCESOS
+   A crea B mediante fork(). B crea un Clon de B mediante otro fork(). El clon
+   no permanece ejecutando el mismo programa: hace execv() y se transforma en C.
+
+2. EVENTOS DE CONTROL
+   A recibe dos señales desde CLI. Las señales no son el canal de datos; sirven
+   para decidir qué ruta IPC debe activarse.
+
+3. DOS CANALES IPC EN PARALELO
+   Una señal activa Message Queue hacia B y la otra activa Pipe hacia C.
+   Por tanto el examen no solo pregunta sintaxis: obliga a mapear proceso-emisor,
+   proceso-receptor y recurso IPC correcto.
+
+4. HERENCIA DE RECURSOS
+   Pipe y cola se crean antes de fork(). El detalle más importante es el Pipe:
+   el Clon de B hereda fd[0], luego execv() mantiene ese descriptor abierto si no
+   tiene FD_CLOEXEC. El control pide pasarlo por argv a C.
+
+Patrón de construcción que conviene usar en examen:
+
+RECURSOS -> FORK B -> EN B: FORK CLON -> EN CLON: PREPARAR FD/ARGV -> EXECV C
+                       |
+                       +-> B CIERRA RECURSOS QUE NO USA Y ESPERA SU IPC
+
+EN A: CERRAR EXTREMOS NO USADOS -> REGISTRAR SEÑALES -> pause()/flags -> ENVIAR IPC
+
+Errores típicos que el control permite detectar:
+- crear el Pipe después de fork y esperar que C lo conozca;
+- cerrar fd[0] en B antes de crear el Clon B;
+- olvidar NULL al final de argv de execv;
+- creer que execv crea un proceso nuevo;
+- usar fd[1] para leer o fd[0] para escribir;
+- no cerrar extremos del Pipe y provocar bloqueos/EOF tardío;
+- enviar un tipo de Message Queue distinto del que msgrcv espera;
+- olvidar que un descriptor pasado por argv sigue siendo solo un número: debe
+  existir realmente en la tabla de descriptores del proceso que ejecutó execv.

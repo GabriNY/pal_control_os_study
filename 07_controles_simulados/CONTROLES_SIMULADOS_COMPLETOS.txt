@@ -1,0 +1,296 @@
+BANCO DE CONTROLES SIMULADOS - SISTEMAS OPERATIVOS 2026-II
+==========================================================
+
+CRITERIO DE CONSTRUCCIÓN
+------------------------
+Los seis controles conservan la lógica del control modelo: un proceso A crea
+recursos IPC, recibe señales desde CLI, crea a B mediante fork(); B crea un clon;
+el clon se transforma mediante execv() en C; y cada proceso tiene un canal de
+comunicación claramente definido. Las variantes cambian qué IPC llega a quién,
+si el descriptor viaja por argv o por dup2(), y si se añade FIFO/confirmación.
+
+==========================================================================
+CONTROL SIMULADO 01 - ROUTER DE DOS CANALES IPC
+==========================================================================
+
+1. OBJETIVOS DE LA EVALUACIÓN
+- Dominar la jerarquía A -> B -> Clon de B -> C con fork() y execv().
+- Capturar SIGINT y SIGTRAP en A.
+- Usar Pipe anónimo y Message Queue System V simultáneamente.
+- Comprender la herencia de descriptores y el paso de fd por argv.
+- Representar la arquitectura con un diagrama de procesos/IPC.
+
+2. VALIDEZ DE SEÑALES
+- SIGINT: capturable. Puede generarse con Ctrl+C o kill -INT PID.
+- SIGTRAP: capturable. Puede enviarse con kill -TRAP PID.
+
+3. ENUNCIADO
+A debe crear un Pipe y una Message Queue ANTES del primer fork(). A crea B.
+B, inmediatamente después de nacer, crea un Clon de B. El clon ejecuta
+execv("./proceso_c", ...) y se transforma en C.
+
+4. ESQUEMA GENERAL
+CLI --SIGINT----> A --Message Queue type=2------------------> B
+CLI --SIGTRAP---> A --Pipe fd[1]----------------------------> C
+                      ^                                      ^
+                      |                                      |
+                      + A crea recursos antes de fork --------+
+
+Jerarquía:
+A
+|
++-- fork() --> B
+                |
+                +-- fork() --> Clon B
+                                 |
+                                 +-- execv("./proceso_c") --> C
+
+5. COMPORTAMIENTO DETALLADO
+Proceso A:
+- crea pipe(fd) y msgget();
+- registra SIGINT y SIGTRAP;
+- espera señales sin consumir CPU;
+- SIGINT: construye mensaje type=2 y ejecuta msgsnd();
+- SIGTRAP: escribe texto por fd[1];
+- cierra fd[0] porque A no lee;
+- al final espera a B y elimina la cola.
+
+Proceso B:
+- nace por fork();
+- antes de leer la cola crea el Clon de B;
+- cierra ambos extremos del Pipe una vez creado C, porque B no usa ese canal;
+- espera type=2 con msgrcv();
+- imprime PID y contenido;
+- espera a C con waitpid().
+
+Proceso C:
+- recibe fd[0] como argv[1];
+- ejecuta atoi(argv[1]);
+- read(fd,...), imprime PID, fd y texto;
+- close(fd).
+
+6. PRUEBA
+Terminal 1: ./proceso_a
+Terminal 2: kill -INT <PID_A>
+Terminal 2: kill -TRAP <PID_A>
+Las señales pueden llegar en cualquier orden.
+
+7. ENTREGABLES
+- Código fuente de A y C.
+- Diagrama jerárquico.
+- Diagrama del flujo IPC.
+- Comandos de compilación y ejecución.
+
+==========================================================================
+CONTROL SIMULADO 02 - CANALES INVERTIDOS
+==========================================================================
+
+1. OBJETIVOS
+- Conservar la misma jerarquía del control modelo.
+- Demostrar que la estructura de procesos es independiente del mecanismo IPC.
+- Pasar el identificador qid a través de argv.
+
+2. SEÑALES
+- SIGUSR1: evento para el flujo A -> Pipe -> B.
+- SIGUSR2: evento para el flujo A -> Message Queue -> C.
+
+3. ENUNCIADO
+A crea Pipe y Message Queue antes de fork(). A crea B. B crea un clon y el clon
+se convierte en C con execv(). A diferencia del control 01, B recibe el Pipe y C
+recibe la Message Queue.
+
+4. ESQUEMA
+CLI --SIGUSR1--> A --Pipe------------------------------> B
+CLI --SIGUSR2--> A --Message Queue type=5--------------> C
+
+A -> fork() -> B -> fork() -> Clon B -> execv(C)
+
+5. COMPORTAMIENTO
+A:
+- cierra fd[0] y conserva fd[1];
+- SIGUSR1: write(fd[1],...);
+- SIGUSR2: msgsnd(type=5,...).
+
+B:
+- conserva fd[0] y cierra fd[1];
+- crea Clon B antes de bloquearse en read();
+- lee Pipe e imprime PID/mensaje;
+- espera a C.
+
+Clon B / C:
+- el clon no necesita Pipe y lo cierra;
+- convierte qid a texto con snprintf();
+- execv("./proceso_c", {"./proceso_c", qid_texto, NULL});
+- C recupera qid con atoi();
+- C ejecuta msgrcv(qid,...,5,0).
+
+6. PREGUNTAS CONCEPTUALES
+- ¿Por qué qid puede pasarse simplemente como un número por argv?
+- ¿Por qué B debe crear C antes de esperar datos del Pipe?
+- ¿Qué descriptores del Pipe debe cerrar C si no los utilizará?
+
+==========================================================================
+CONTROL SIMULADO 03 - PIPE REDIRIGIDO A STDIN
+==========================================================================
+
+1. OBJETIVOS
+- Usar fork + dup2 + execv de forma integrada.
+- Diferenciar pasar un descriptor por argv de redirigirlo a STDIN.
+- Mantener Message Queue como canal independiente hacia B.
+
+2. SEÑALES
+- SIGINT: A -> MQ type=3 -> B.
+- SIGUSR1: A -> Pipe -> C.
+
+3. RESTRICCIÓN PRINCIPAL
+C NO puede recibir el número de fd por argv.
+
+4. JERARQUÍA/FLUJO
+A
+|
++-- fork() --> B
+                |
+                +-- fork() --> Clon B
+                                 |
+                                 +-- close(fd[1])
+                                 +-- dup2(fd[0], STDIN_FILENO)
+                                 +-- close(fd[0])
+                                 +-- execv("./proceso_c")
+                                          |
+                                          +-- read(STDIN_FILENO,...)
+
+SIGINT  -> A -> MQ -> B
+SIGUSR1 -> A -> Pipe -> STDIN de C
+
+5. COMPORTAMIENTO
+- A crea recursos antes de fork().
+- B recibe únicamente Message Queue.
+- Clon B redirige fd[0] a descriptor 0 y después ejecuta C.
+- C no necesita argc/argv para el Pipe.
+
+6. PREGUNTA TEÓRICA
+Explicar por qué el descriptor 0 de C sigue apuntando al Pipe incluso después de
+execv(). La respuesta debe mencionar dup2(), herencia de la tabla de descriptores
+y el hecho de que execv() reemplaza la imagen del proceso pero no crea otro PID.
+
+==========================================================================
+CONTROL SIMULADO 04 - CADENA SIGNAL -> FIFO -> MQ -> PIPE -> DUP2 -> EXECV
+==========================================================================
+
+1. OBJETIVOS
+- Integrar todos los mecanismos estudiados en una cadena coherente.
+- Diferenciar mecanismo de activación (Signal) y mecanismos de transporte.
+- Manejar correctamente bloqueos de FIFO, cola y Pipe.
+
+2. RECURSOS
+- FIFO: /tmp/control04_fifo
+- Message Queue System V
+- Pipe anónimo
+
+3. SEÑALES
+- SIGUSR1: activa lectura del FIFO.
+- SIGUSR2: genera un mensaje interno de estado.
+
+4. JERARQUÍA
+A -> fork() -> B -> fork() -> Clon B -> dup2() -> execv(C)
+
+5. EVENTO 1
+CLI: kill -USR1 PID_A
+A: recibe señal y open(FIFO,O_RDONLY)
+CLI: echo "dato" > /tmp/control04_fifo
+A: read(FIFO) -> msgsnd(type=1)
+B: msgrcv() -> write(Pipe)
+C: fgets(stdin) porque Pipe fue redirigido con dup2
+
+6. EVENTO 2
+CLI: kill -USR2 PID_A
+A: msgsnd(type=2,"estado generado internamente")
+B: msgrcv() -> write(Pipe)
+C: recibe la segunda línea por STDIN
+
+7. REQUISITOS IMPORTANTES
+- A NO debe hacer open(FIFO,O_RDONLY) antes de SIGUSR1.
+- El Clon de B debe existir antes de que B cierre fd[0].
+- B conserva fd[1] porque reenvía los mensajes a C.
+- C procesa dos líneas para no depender de que dos write() lleguen como dos read().
+- A elimina la cola y unlink() del FIFO al terminar.
+
+8. PREGUNTA
+¿Por qué un Pipe es un flujo de bytes y no conserva necesariamente los límites de
+cada write()? Explicar por qué usar saltos de línea + fgets() ayuda en este ejemplo.
+
+==========================================================================
+CONTROL SIMULADO 05 - CONFIRMACIÓN DE RECEPCIÓN
+==========================================================================
+
+1. OBJETIVOS
+- Utilizar tipos distintos de una misma Message Queue para solicitud y ACK.
+- Enviar una señal desde un proceso C hacia A.
+- Mantener la jerarquía B -> Clon -> execv(C).
+
+2. FLUJO 1
+CLI --SIGINT--> A --MQ type=1--> B --MQ type=2 ACK--> A
+
+3. FLUJO 2
+CLI --SIGTRAP--> A --Pipe--> C --kill(SIGUSR1)--> A
+
+4. REQUISITOS
+A:
+- captura SIGINT, SIGTRAP y SIGUSR1;
+- type=1 significa solicitud para B;
+- type=2 significa confirmación de B;
+- SIGUSR1 recibido desde C significa confirmación del Pipe.
+
+B:
+- recibe type=1;
+- imprime mensaje;
+- responde type=2;
+- crea C antes de bloquearse.
+
+C:
+- recibe por argv: fd_pipe y PID_A;
+- lee el Pipe;
+- ejecuta kill(PID_A,SIGUSR1) después de procesar el texto.
+
+5. PREGUNTAS
+- ¿Por qué SIGUSR1 aquí no viene de la CLI sino de otro proceso?
+- ¿Qué diferencia existe entre el ACK type=2 y el ACK SIGUSR1?
+- ¿Cuál de los dos mecanismos transporta texto y cuál solo notifica un evento?
+
+==========================================================================
+CONTROL SIMULADO 06 - FD_CLOEXEC Y HERENCIA DE DESCRIPTORES
+==========================================================================
+
+1. OBJETIVOS
+- Explicar qué ocurre con un descriptor abierto durante execv().
+- Usar fcntl(F_GETFD) y FD_CLOEXEC.
+- Mantener el mismo esquema de dos canales del control modelo.
+
+2. FLUJO
+SIGINT  -> A -> Message Queue type=7 -> B
+SIGTRAP -> A -> Pipe ----------------> C
+
+3. JERARQUÍA
+A -> B -> Clon B -> execv(C)
+
+4. COMPORTAMIENTO ESPECIAL DEL CLON
+- consulta flags = fcntl(fd[0], F_GETFD);
+- informa si flags & FD_CLOEXEC está activado;
+- convierte fd[0] a texto;
+- ejecuta C con argv[1]=descriptor.
+
+5. COMPORTAMIENTO DE C
+- atoi(argv[1]);
+- vuelve a ejecutar fcntl(fd,F_GETFD);
+- si funciona, demuestra que el descriptor sobrevivió a execv();
+- read(fd,...), imprime y close(fd).
+
+6. MODIFICACIÓN PROPUESTA
+Repetir conceptualmente el ejercicio suponiendo que antes de execv se ejecuta:
+    fcntl(fd[0], F_SETFD, FD_CLOEXEC);
+El alumno debe explicar que el descriptor será cerrado por execv y C recibirá
+un número que ya no referencia un descriptor válido en ese proceso.
+
+==========================================================================
+FIN DEL BANCO
+==========================================================================

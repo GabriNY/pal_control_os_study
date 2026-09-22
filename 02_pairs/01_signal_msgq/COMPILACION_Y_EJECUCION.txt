@@ -1,0 +1,39 @@
+COMPILACIÓN Y EJECUCIÓN - 02_pairs/01_signal_msgq
+================================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- receiver.c -> ejecutable ./receiver
+- sender.c -> ejecutable ./sender
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic sender.c -o sender
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Clave Message Queue: 0x5201
+- Señales usadas: SIGUSR1
+- Tipos de mensaje visibles: 1
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Terminal 1: ejecuta ./receiver para que quede esperando.
+2. Terminal 2: ejecuta ./sender.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

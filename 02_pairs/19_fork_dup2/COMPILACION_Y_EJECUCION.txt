@@ -1,0 +1,37 @@
+COMPILACIÓN Y EJECUCIÓN - 02_pairs/19_fork_dup2
+==============================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- main.c -> ejecutable ./main
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Compila todos los .c de la carpeta.
+2. Ejecuta ./main.
+5. Si queda esperando FIFO, usa otra terminal para abrir/escribir el extremo complementario.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

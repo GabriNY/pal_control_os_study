@@ -1,0 +1,31 @@
+CONTROL SIMULADO 06 - HERENCIA DE DESCRIPTORES Y FD_CLOEXEC
+==========================================================
+
+Objetivo
+--------
+Repetir la arquitectura principal del control modelo, pero demostrando de forma
+explícita por qué un descriptor puede sobrevivir a execv().
+
+Flujo
+-----
+SIGINT  -> A -> Message Queue type=7 -> B
+SIGTRAP -> A -> Pipe -----------------> C
+
+Jerarquía
+---------
+A -> fork() -> B -> fork() -> Clon B -> execv(C)
+
+Requisitos especiales
+---------------------
+- El Clon de B debe consultar fcntl(fd[0], F_GETFD) antes de execv().
+- Debe verificar que FD_CLOEXEC esté desactivado.
+- fd[0] se pasa como argv[1].
+- C repite fcntl(fd, F_GETFD) después de execv() y muestra si el descriptor sigue abierto.
+- C hace read(fd, ...), imprime el contenido y cierra el descriptor.
+- B recibe la Message Queue e imprime PID y mensaje.
+
+Pregunta conceptual obligatoria
+-------------------------------
+¿Qué ocurriría si el Clon ejecutara:
+    fcntl(fd[0], F_SETFD, FD_CLOEXEC);
+antes de execv()?

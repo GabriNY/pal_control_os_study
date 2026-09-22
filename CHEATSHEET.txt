@@ -1,0 +1,28 @@
+CHEAT SHEET — OS IPC
+
+pipe(fd): fd[0]=READ, fd[1]=WRITE
+fork(): -1 error, 0 child, >0 parent receives child PID
+dup2(old,new): new now refers to same open file description as old
+execv(path,args): replaces current program; returns only on error
+STDIN=0 STDOUT=1 STDERR=2
+
+FIFO: mkfifo -> open -> read/write -> close -> unlink
+MQ: msgget -> msgsnd/msgrcv -> msgctl IPC_RMID
+Signal: handler -> flag or siglongjmp -> main action
+
+CLASSIC ORDER:
+pipe -> fork -> close unused -> dup2 -> close original -> execv
+parent -> close read -> write -> close write -> wait
+
+COMPILE:
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra x.c -o x
+
+SIGNALS:
+kill -USR1 PID
+kill -USR2 PID
+kill -INT PID
+
+DEBUG:
+ps -ef | grep name
+ipcs -q
+ls -l /proc/PID/fd

@@ -1,0 +1,43 @@
+COMPILACIÓN Y EJECUCIÓN - 06_lab_style
+=====================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- sigsetjmp/siglongjmp: guarda y recupera un punto de ejecución según el patrón de laboratorio.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- signal_sigjmp_msgq_emitter.c -> ejecutable ./signal_sigjmp_msgq_emitter
+- signal_sigjmp_msgq_receiver.c -> ejecutable ./signal_sigjmp_msgq_receiver
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic signal_sigjmp_msgq_emitter.c -o signal_sigjmp_msgq_emitter
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic signal_sigjmp_msgq_receiver.c -o signal_sigjmp_msgq_receiver
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Clave Message Queue: 0x5601
+- Señales usadas: SIGINT, SIGUSR1, SIGUSR2
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- sigsetjmp/siglongjmp: guarda y recupera un punto de ejecución según el patrón de laboratorio.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Compila emitter y receiver.
+2. Terminal 1: ./signal_sigjmp_msgq_receiver.
+3. Terminal 2: ./signal_sigjmp_msgq_emitter; copia su PID.
+4. Envía la señal que el programa solicita con kill -<SEÑAL> <PID>.
+5. El emisor salta/regresa según sigsetjmp/siglongjmp y termina enviando por Message Queue.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

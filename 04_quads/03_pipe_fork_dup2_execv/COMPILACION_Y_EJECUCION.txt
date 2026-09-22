@@ -1,0 +1,39 @@
+COMPILACIÓN Y EJECUCIÓN - 04_quads/03_pipe_fork_dup2_execv
+=========================================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- child.c -> ejecutable ./child
+- parent.c -> ejecutable ./parent
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic child.c -o child
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic parent.c -o parent
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Ejecutables referenciados por argv/execv: ./child
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Compila los archivos indicados.
+2. Ejecuta el programa que actúa como padre/emisor y sigue las instrucciones que imprime por pantalla.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

@@ -1,0 +1,34 @@
+CONTROL SIMULADO 03 - PIPE REDIRIGIDO A STDIN
+=============================================
+
+Objetivo
+--------
+Resolver una arquitectura casi idéntica al control modelo, pero el proceso C
+NO puede recibir el descriptor del Pipe por argv. Debe recibirlo como STDIN.
+
+Señales
+-------
+- SIGINT: A envía Message Queue tipo 3 hacia B.
+- SIGUSR1: A escribe en el Pipe hacia C.
+
+Jerarquía
+---------
+A -> fork() -> B -> fork() -> Clon B -> dup2(fd[0], STDIN_FILENO) -> execv(C)
+
+Requisitos de B
+---------------
+- B original recibe la cola de mensajes.
+- El Clon de B cierra fd[1].
+- El Clon ejecuta dup2(fd[0], STDIN_FILENO).
+- Después de dup2 debe cerrar fd[0].
+- Recién entonces ejecuta execv("./proceso_c", ...).
+
+Requisitos de C
+---------------
+- proceso_c no recibe descriptor por argv.
+- debe leer con read(STDIN_FILENO, ...).
+- mostrar PID y mensaje.
+
+Pregunta conceptual obligatoria
+-------------------------------
+Explicar por qué C puede leer el Pipe usando descriptor 0 después de execv().

@@ -1,0 +1,37 @@
+CONTROL SIMULADO 02 - CANALES INVERTIDOS
+========================================
+
+Objetivo
+--------
+Mantener la misma jerarquía A -> B -> Clon de B -> execv(C), pero invertir qué
+proceso recibe cada mecanismo IPC.
+
+Recursos de A
+-------------
+- Pipe anónimo.
+- Message Queue System V.
+
+Señales de A
+------------
+- SIGUSR1: A escribe por el Pipe y el receptor debe ser B.
+- SIGUSR2: A envía Message Queue tipo 5 y el receptor debe ser C.
+
+Jerarquía
+---------
+A
+|
++--fork()--> B --fork()--> Clon B --execv()--> C
+
+Requisitos
+----------
+- B debe leer fd[0] del Pipe e imprimir el dato recibido.
+- Antes de ponerse a leer, B crea su clon.
+- El clon convierte el identificador de la cola qid a texto y lo entrega a C por argv.
+- C recupera qid con atoi() y ejecuta msgrcv(..., type=5, ...).
+- A debe demostrar que los dos mecanismos se crearon antes del primer fork().
+- Debe existir manejo correcto de close() y wait().
+
+Flujo
+-----
+SIGUSR1 -> A -> Pipe -> B
+SIGUSR2 -> A -> Message Queue -> C

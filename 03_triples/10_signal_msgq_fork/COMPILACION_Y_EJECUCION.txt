@@ -1,0 +1,40 @@
+COMPILACIÓN Y EJECUCIÓN - 03_triples/10_signal_msgq_fork
+=======================================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- main.c -> ejecutable ./main
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic main.c -o main
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Clave Message Queue: 0x5310
+- Señales usadas: SIGUSR1
+- Tipos de mensaje visibles: 1
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Compila todos los .c de la carpeta.
+2. Ejecuta ./main.
+4. Si main imprime su PID, envía la señal indicada desde otra terminal.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

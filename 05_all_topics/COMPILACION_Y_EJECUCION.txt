@@ -1,0 +1,55 @@
+COMPILACIÓN Y EJECUCIÓN - 05_all_topics
+======================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- launcher.c -> ejecutable ./launcher
+- receiver.c -> ejecutable ./receiver
+- worker.c -> ejecutable ./worker
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic launcher.c -o launcher
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic receiver.c -o receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic worker.c -o worker
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Ruta FIFO: /tmp/os_exam_all_fifo
+- Clave Message Queue: 0x5A77
+- Señales usadas: SIGUSR1
+- Ejecutables referenciados por argv/execv: ./worker
+- Tipos de mensaje visibles: 7
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+1. Compila launcher.c, worker.c y receiver.c.
+2. Terminal 1: ./receiver  (queda bloqueado en msgrcv esperando al worker).
+3. Terminal 2: ./launcher  (crea FIFO/pipe, hace fork y el hijo ejecuta ./worker).
+4. Terminal 3: kill -USR1 <PID_DEL_LAUNCHER>.
+5. Terminal 3: echo 'mensaje examen' > /tmp/os_exam_all_fifo.
+6. Flujo esperado: Signal -> launcher -> FIFO -> Pipe -> dup2 -> execv(worker) -> Message Queue -> receiver.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

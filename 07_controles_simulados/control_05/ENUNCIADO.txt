@@ -1,0 +1,29 @@
+CONTROL SIMULADO 05 - IPC CON CONFIRMACIÓN Y SEÑAL DE RETORNO
+============================================================
+
+Objetivo
+--------
+Extender el patrón del control modelo agregando confirmaciones de recepción.
+
+Jerarquía
+---------
+A -> B -> Clon B -> execv(C)
+
+Eventos
+-------
+- SIGINT desde CLI hacia A:
+  A envía Message Queue tipo 1 a B.
+  B imprime el contenido y responde a A con Message Queue tipo 2 (ACK).
+  A imprime el ACK.
+
+- SIGTRAP desde CLI hacia A:
+  A escribe al Pipe para C.
+  C imprime el mensaje y luego envía kill(PID_A, SIGUSR1) como confirmación.
+  A captura SIGUSR1 e imprime que C confirmó la lectura.
+
+Requisitos
+----------
+- A debe pasar su PID a C a través de la cadena B -> execv(C), usando argv.
+- C debe recibir también el descriptor de lectura del Pipe mediante argv.
+- B debe esperar a C antes de terminar.
+- A debe distinguir señales de usuario de las señales de activación del control.

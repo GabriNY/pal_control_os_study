@@ -1,0 +1,70 @@
+COMPILACIÓN Y EJECUCIÓN - 01_basics
+==================================
+
+1. QUÉ PRACTICA ESTE EJEMPLO
+---------------------------
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- sigsetjmp/siglongjmp: guarda y recupera un punto de ejecución según el patrón de laboratorio.
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+2. ARCHIVOS Y COMPILACIÓN
+--------------------------
+- 01_signal_flags.c -> ejecutable ./01_signal_flags
+- 02_signal_sigjmp.c -> ejecutable ./02_signal_sigjmp
+- 03_fifo_writer.c -> ejecutable ./03_fifo_writer
+- 04_fifo_reader.c -> ejecutable ./04_fifo_reader
+- 05_msg_sender.c -> ejecutable ./05_msg_sender
+- 06_msg_receiver.c -> ejecutable ./06_msg_receiver
+- 07_pipe_fork.c -> ejecutable ./07_pipe_fork
+- 08_dup2_exec_child.c -> ejecutable ./08_dup2_exec_child
+- 08_dup2_exec_parent.c -> ejecutable ./08_dup2_exec_parent
+
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 01_signal_flags.c -o 01_signal_flags
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 02_signal_sigjmp.c -o 02_signal_sigjmp
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 03_fifo_writer.c -o 03_fifo_writer
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 04_fifo_reader.c -o 04_fifo_reader
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 05_msg_sender.c -o 05_msg_sender
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 06_msg_receiver.c -o 06_msg_receiver
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 07_pipe_fork.c -o 07_pipe_fork
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 08_dup2_exec_child.c -o 08_dup2_exec_child
+gcc -std=c11 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -pedantic 08_dup2_exec_parent.c -o 08_dup2_exec_parent
+
+3. DATOS/RECURSOS QUE RECIBE EL PROGRAMA
+----------------------------------------
+- Ruta FIFO: /tmp/os_exam_fifo
+- Clave Message Queue: 0x4512
+- Señales usadas: SIGUSR1
+- Ejecutables referenciados por argv/execv: ./08_dup2_exec_child
+- Tipos de mensaje visibles: 1
+- Signal: recibe un evento asíncrono (SIGINT/SIGUSR1/etc.). La señal activa una acción; normalmente NO transporta el texto.
+- sigsetjmp/siglongjmp: guarda y recupera un punto de ejecución según el patrón de laboratorio.
+- FIFO: recibe/envía bytes usando una ruta en /tmp. open(O_RDONLY/O_WRONLY) puede bloquear esperando al otro extremo.
+- Message Queue: intercambia struct de mensajes mediante msgget/msgsnd/msgrcv; long type selecciona la clase de mensaje.
+- Pipe: fd[0] es lectura y fd[1] es escritura. Si se crea antes de fork(), los descendientes heredan ambos descriptores.
+- fork: crea un nuevo proceso. 0 significa hijo; >0 significa padre; -1 significa error.
+- dup2: redirige un descriptor a un número conocido, normalmente STDIN_FILENO(0) o STDOUT_FILENO(1).
+- execv: reemplaza el programa del proceso actual. Conserva el PID y, salvo FD_CLOEXEC, conserva los descriptores abiertos.
+
+4. ORDEN DE EJECUCIÓN
+---------------------
+Los archivos de 01_basics son ejercicios independientes. Ejecuta cada uno según su tema:
+- 01_signal_flags: ./01_signal_flags y luego kill -USR1 <PID>.
+- 02_signal_sigjmp: ./02_signal_sigjmp y envía la señal indicada.
+- FIFO: primero ./04_fifo_reader en una terminal y luego ./03_fifo_writer en otra (o sigue el mensaje que impriman).
+- Message Queue: primero ./06_msg_receiver y luego ./05_msg_sender.
+- 07_pipe_fork: ./07_pipe_fork; padre e hijo se crean dentro del mismo ejecutable.
+- dup2+execv: compila 08_dup2_exec_child y 08_dup2_exec_parent; ejecuta solo ./08_dup2_exec_parent.
+
+5. QUÉ DEBES OBSERVAR
+---------------------
+- Qué PID corresponde al padre y a cada hijo.
+- Qué proceso queda bloqueado en pause(), read(), open(), msgrcv() o wait().
+- Qué extremo del Pipe/FIFO usa cada proceso y qué close() son necesarios.
+- Si existe execv(), recuerda que el PID no cambia: cambia el programa que ejecuta ese proceso.
+- Si existe dup2(), identifica qué descriptor estándar fue redirigido y desde dónde llegan realmente los bytes.
+- Al finalizar, revisa que no queden FIFOs/colas de mensajes residuales cuando el ejemplo las elimina.

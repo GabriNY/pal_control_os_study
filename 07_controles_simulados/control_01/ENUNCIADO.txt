@@ -1,0 +1,63 @@
+CONTROL SIMULADO 01 - ROUTER DE DOS CANALES IPC
+==============================================
+
+Objetivo
+--------
+Diseñar una solución en C/POSIX formada por tres procesos lógicos A, B y C.
+Debe combinar señales, fork(), execv(), Pipe anónimo y Message Queue System V.
+
+Jerarquía obligatoria
+---------------------
+Proceso A
+  |
+  +-- fork() --> Proceso B
+                   |
+                   +-- fork() --> Clon de B
+                                    |
+                                    +-- execv("./proceso_c") --> Proceso C
+
+Recursos creados por A antes del primer fork()
+-----------------------------------------------
+1. Pipe anónimo fd[2].
+2. Cola de mensajes System V.
+
+Señales
+-------
+- SIGINT: enviada desde terminal con kill -INT <PID_A> o Ctrl+C.
+- SIGTRAP: enviada desde terminal con kill -TRAP <PID_A>.
+
+Comportamiento
+--------------
+A) Proceso A:
+- registra manejadores para SIGINT y SIGTRAP;
+- permanece en espera pasiva;
+- al recibir SIGINT construye un mensaje y lo envía por Message Queue al proceso B;
+- al recibir SIGTRAP escribe un mensaje en fd[1] para que llegue al proceso C;
+- debe cerrar los extremos del Pipe que no usa.
+
+B) Proceso B:
+- nace mediante fork() desde A;
+- inmediatamente crea un Clon de B mediante un segundo fork();
+- B original cierra el Pipe porque solo recibirá Message Queue;
+- espera un mensaje de tipo 2 con msgrcv();
+- imprime PID y contenido;
+- espera la terminación de C.
+
+C) Proceso C:
+- el Clon de B recibe heredado fd[0];
+- convierte fd[0] a texto y lo pasa a execv() mediante argv;
+- proceso_c convierte argv[1] nuevamente a int;
+- lee el Pipe y muestra PID, descriptor y contenido.
+
+Diagrama de IPC
+---------------
+CLI --SIGINT--> A --Message Queue(type=2)--> B
+CLI --SIGTRAP-> A --Pipe fd[1]-----------> C
+
+Entregables
+-----------
+- proceso_a.c
+- proceso_c.c
+- diagrama de procesos y comunicación
+- comandos de compilación
+- secuencia exacta de ejecución y señales

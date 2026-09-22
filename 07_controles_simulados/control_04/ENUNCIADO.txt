@@ -1,0 +1,38 @@
+CONTROL SIMULADO 04 - CADENA COMPLETA SIGNAL -> FIFO -> MQ -> PIPE -> EXECV
+===========================================================================
+
+Objetivo
+--------
+Construir una cadena en la que el dato avance por varios mecanismos IPC.
+
+Jerarquía
+---------
+A -> fork() -> B -> fork() -> Clon B -> dup2() -> execv(C)
+
+Recursos creados por A antes de fork()
+--------------------------------------
+- FIFO /tmp/control04_fifo
+- Message Queue System V
+- Pipe anónimo
+
+Eventos
+-------
+1. SIGUSR1:
+   - A recibe la señal.
+   - A abre el FIFO en lectura.
+   - desde otra terminal se ejecuta: echo "texto" > /tmp/control04_fifo
+   - A lee el texto y lo envía por Message Queue tipo 1 a B.
+   - B recibe la cola y reenvía el mismo texto por el Pipe.
+   - C recibe el Pipe por STDIN debido a dup2() y lo imprime.
+
+2. SIGUSR2:
+   - A crea internamente un mensaje de estado.
+   - A lo envía por Message Queue tipo 2 a B.
+   - B también lo reenvía por el Pipe a C.
+
+Requisitos
+----------
+- El handler solo debe activar banderas sig_atomic_t.
+- B debe procesar dos mensajes y C debe procesar dos mensajes.
+- Deben cerrarse los extremos del Pipe que cada proceso no utiliza.
+- A elimina FIFO y Message Queue al final.
