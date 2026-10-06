@@ -1,0 +1,7 @@
+COMPILACION Y EJECUCION
+=======================
+
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread solucion/detached_worker.cpp -o detached_worker
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread solucion/coordinador.cpp -o coordinador
+./coordinador
+# desde otra terminal: kill -USR1 <PID>

@@ -1,0 +1,5 @@
+COMPILACION Y EJECUCION
+=======================
+
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread solucion/main.cpp -o control07
+./control07

@@ -1,0 +1,70 @@
+===== control_01_detach_mutex_excepciones =====
+[worker 1] trabajo correcto
+[worker 7] trabajo correcto
+[worker 2] trabajo correcto
+[worker 4] trabajo correcto
+[worker 5] trabajo correcto
+[worker 3] catch: id múltiplo de 3
+[worker 0] catch: id múltiplo de 3
+[worker 6] catch: id múltiplo de 3
+main: los 8 detached workers terminaron
+
+===== control_02_condition_variable_turnos =====
+Proceso 0
+Proceso 1
+Proceso 2
+Proceso 3
+Proceso 4
+Proceso 5
+
+===== control_03_lock_guard_excepciones =====
+7 rechazado: solo se aceptan pares
+4 aceptado
+5 rechazado: solo se aceptan pares
+6 aceptado
+1 rechazado: solo se aceptan pares
+3 rechazado: solo se aceptan pares
+8 aceptado
+2 aceptado
+9 rechazado: solo se aceptan pares
+10 aceptado
+
+===== control_04_productor_consumidor_cv =====
+[productor] -> 1
+[productor] -> 2
+[productor] -> 3
+[productor] -> 4
+[productor] -> 5
+[consumidor] <- 1
+[consumidor] <- 2
+[consumidor] <- 3
+[consumidor] <- 4
+[consumidor] <- 5
+
+===== control_05_pipe_fork_execv_threads =====
+[thread 5] contador=1
+[thread 0] contador=2
+[thread 3] contador=3
+[thread 3] catch: id impar
+[thread 4] contador=4
+[thread 1] contador=5
+[thread 1] catch: id impar
+[thread 2] contador=6
+[thread 5] catch: id impar
+contador final=6
+
+===== control_06_signal_pipe_execv_detach =====
+PID coordinador: 1086
+Esperando SIGUSR1...
+[detached 0] trabajo terminado
+[detached 4] trabajo terminado
+[detached 1] trabajo terminado
+[detached 2] trabajo terminado
+[detached 3] trabajo terminado
+Todos los detached workers finalizaron: 5
+
+===== control_07_prevencion_deadlock_dos_mutex =====
+A->B: transferencia correcta
+B->A: transferencia correcta
+Saldo A=90 Saldo B=110
+

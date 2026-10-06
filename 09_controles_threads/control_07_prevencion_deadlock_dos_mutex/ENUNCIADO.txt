@@ -1,0 +1,16 @@
+CONTROL SIMULADO 07 - DEADLOCK + DOS MUTEX + LOCK_GUARD
+======================================================
+
+Se tienen dos cuentas A y B, cada una protegida por su propio mutex.
+Dos threads realizan transferencias simultáneas A->B y B->A.
+
+1. Explique por qué hacer:
+   lock(mutexA); lock(mutexB);
+   en un thread y
+   lock(mutexB); lock(mutexA);
+   en el otro puede generar deadlock.
+2. Corrija el problema usando std::lock(mutexA, mutexB).
+3. Después de std::lock, gestione ambos mutex mediante std::lock_guard con std::adopt_lock.
+4. Lance std::runtime_error si una cuenta no tiene saldo suficiente.
+5. Capture la excepción dentro de cada worker.
+6. Ejecute ambos workers concurrentemente y use join().

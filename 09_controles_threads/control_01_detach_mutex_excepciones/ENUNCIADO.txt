@@ -1,0 +1,15 @@
+CONTROL SIMULADO 01 - DETACH + MUTEX + TRY/CATCH + THROW
+========================================================
+
+Diseñe un programa C++ que cree 8 threads trabajadores.
+
+1. Cada trabajador debe ejecutarse con detach().
+2. Todos reciben un identificador entero entre 0 y 7.
+3. Debe existir un contador global `finalizados` protegido por mutex.
+4. Si el identificador es múltiplo de 3, el worker debe lanzar una std::logic_error con throw.
+5. La excepción debe ser capturada dentro del mismo worker mediante try/catch.
+6. Tanto los workers exitosos como los que capturaron excepción deben incrementar `finalizados`.
+7. Como los threads están detached, main NO puede usar join(). Debe usar una condition_variable para esperar hasta que finalizados == 8.
+8. El proceso debe terminar solo después de comprobar que los 8 workers acabaron.
+
+Explique por qué dormir main con sleep_for() no sería una sincronización correcta.

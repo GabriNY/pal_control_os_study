@@ -1,0 +1,20 @@
+CONTROL SIMULADO 02 - MUTEX + CONDITION_VARIABLE + TURNOS
+========================================================
+
+Cree 6 threads con ids 0..5. Aunque el scheduler pueda ejecutarlos en cualquier orden,
+la salida obligatoriamente debe ser:
+
+Proceso 0
+Proceso 1
+Proceso 2
+Proceso 3
+Proceso 4
+Proceso 5
+
+Requisitos:
+- Variable global `turno` inicializada en 0.
+- Un mutex y una condition_variable.
+- Cada thread debe dormir con cv.wait(...) hasta que `id == turno`.
+- Después de imprimir debe incrementar turno y despertar a los demás.
+- main debe usar join() sobre todos los threads.
+- Debe usarse el overload de wait con predicado para protegerse contra despertares espurios.

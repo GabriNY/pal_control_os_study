@@ -1,0 +1,13 @@
+CONTROL SIMULADO 04 - PRODUCTOR/CONSUMIDOR CON CONDITION_VARIABLE
+=================================================================
+
+Implemente un productor y un consumidor usando threads.
+
+- El productor genera los valores 1..5 y los inserta en una cola compartida.
+- La cola debe estar protegida por mutex.
+- El consumidor no debe hacer polling ni sleep para esperar datos.
+- Debe dormir con condition_variable hasta que exista un elemento o el productor haya terminado.
+- El productor debe llamar notify_one() después de insertar cada elemento.
+- Al terminar debe activar una bandera `fin=true` y notificar al consumidor.
+- Ambos threads deben ser unidos con join().
+- Si el consumidor obtiene un valor negativo, debe lanzar una excepción. En la solución normal no aparecerá un valor negativo, pero el bloque try/catch debe existir.

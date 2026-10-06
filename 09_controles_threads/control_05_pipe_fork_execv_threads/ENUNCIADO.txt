@@ -1,0 +1,22 @@
+CONTROL SIMULADO 05 - PIPE + FORK + DUP2 + EXECV + THREADS + CV
+===============================================================
+
+Diseñe dos ejecutables: `proceso_a` y `worker_threads`.
+
+Proceso A:
+1. Crea un pipe anónimo.
+2. Ejecuta fork().
+3. El hijo redirige el extremo de lectura a STDIN mediante dup2().
+4. El hijo ejecuta `worker_threads` usando execv().
+5. El padre escribe por el pipe el entero 6 y espera al hijo con waitpid().
+
+worker_threads:
+1. Lee N desde STDIN.
+2. Crea N threads.
+3. Todos los threads deben quedar esperando una condition_variable hasta que main active `inicio=true`.
+4. Cuando se liberen, cada uno incrementa un contador compartido protegido por mutex/lock_guard.
+5. Si el id es impar, debe lanzar y capturar una std::logic_error después de registrar su participación.
+6. main debe hacer join() de todos los threads e imprimir el contador final.
+
+Dibuje la relación:
+A padre -> pipe -> A hijo -> dup2 -> execv -> worker_threads -> N threads.

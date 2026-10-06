@@ -1,0 +1,90 @@
+COMPILACION DE LOS EJEMPLOS C++ DE THREADS
+==========================================
+
+IMPORTANTE
+----------
+Estos programas son C++, aunque los originales tenían extensión .c.
+Use g++, no gcc, y agregue -pthread.
+
+Comando general:
+
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread archivo.cpp -o ejecutable
+
+1) JOIN
+-------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 01_threads_join_espera_ordenada.cpp -o threads_join
+./threads_join
+
+Proceso esperado:
+- main crea tres threads.
+- cada thread ejecuta pause_thread().
+- main llama join() tres veces.
+- el proceso no termina hasta que los tres threads terminaron.
+
+2) MUTEX MANUAL + TRY/CATCH + THROW
+-----------------------------------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 02_mutex_manual_try_catch_throw.cpp -o mutex_excepciones
+./mutex_excepciones
+
+Proceso esperado:
+- varios threads intentan entrar a la sección crítica.
+- mtx.lock() permite solo uno a la vez.
+- ids impares ejecutan throw logic_error.
+- catch captura la excepción.
+- como el mutex fue adquirido manualmente, catch debe ejecutar unlock().
+
+3) LOCK_GUARD + EXCEPCIONES
+---------------------------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 03_lock_guard_excepcion_segura.cpp -o lock_guard_excepciones
+./lock_guard_excepciones
+
+Proceso esperado:
+- lock_guard adquiere el mutex.
+- para valores impares print_even() lanza una excepción.
+- al salir del bloque por excepción se destruye lock_guard y se libera el mutex automáticamente.
+- catch imprime el error.
+
+4) DETACH
+---------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 04_threads_detach_ciclo_vida.cpp -o threads_detach
+./threads_detach
+
+Proceso esperado:
+- main crea threads y llama detach().
+- no hay join() posterior.
+- los threads existen mientras el proceso siga vivo.
+- main espera brevemente solo para poder observarlos terminar.
+
+5) CONDITION_VARIABLE: INICIO SIMULTANEO
+----------------------------------------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 05_condition_variable_inicio_simultaneo.cpp -o cv_inicio
+./cv_inicio
+
+Proceso esperado:
+- los workers toman unique_lock y llaman cv.wait().
+- wait libera el mutex mientras esperan.
+- go() cambia ready=true bajo mutex.
+- notify_all() despierta a los workers.
+- cada worker vuelve a adquirir el mutex antes de continuar.
+
+6) CONDITION_VARIABLE: TURNOS
+-----------------------------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 06_condition_variable_turnos_ordenados.cpp -o cv_turnos
+./cv_turnos
+
+Proceso esperado:
+- todos los threads esperan la misma cv.
+- solo avanza aquel cuyo id == turno.
+- el thread incrementa turno y hace notify_all().
+- la salida queda ordenada 0,1,2,...,9 aunque los threads hayan sido creados concurrentemente.
+
+7) PREVENCION DE DEADLOCK CON std::lock + lock_guard
+-----------------------------------------------------
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread 07_prevencion_deadlock_std_lock_lock_guard.cpp -o prevenir_deadlock
+./prevenir_deadlock
+
+Proceso esperado:
+- dos threads necesitan los mismos dos recursos.
+- std::lock adquiere ambos mutex de forma coordinada.
+- lock_guard(adopt_lock) toma responsabilidad de liberarlos automáticamente.
+- se evita el patrón clásico A->B y B->A que puede producir deadlock.

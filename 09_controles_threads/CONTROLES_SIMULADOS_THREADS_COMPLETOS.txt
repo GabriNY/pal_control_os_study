@@ -1,0 +1,12 @@
+NUEVA SERIE DE CONTROLES - THREADS Y SINCRONIZACION
+===================================================
+
+CONTROL 01: detach + mutex + try/catch + throw + condition_variable para esperar finalización.
+CONTROL 02: condition_variable + mutex para imponer turnos deterministas.
+CONTROL 03: lock_guard + excepciones; seguridad RAII ante throw.
+CONTROL 04: productor/consumidor con mutex + condition_variable + excepción.
+CONTROL 05: integración POSIX: pipe + fork + dup2 + execv -> programa C++ con threads, mutex, CV y excepciones.
+CONTROL 06: integración POSIX: SIGUSR1 + pipe + fork + dup2 + execv -> threads detached coordinados con CV.
+
+Cada carpeta contiene ENUNCIADO.txt, solucion/ y COMPILACION_Y_EJECUCION.txt.
+CONTROL 07: deadlock con dos mutex; prevención mediante std::lock + lock_guard(adopt_lock) + excepciones.

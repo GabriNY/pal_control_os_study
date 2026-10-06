@@ -1,0 +1,6 @@
+COMPILACION Y EJECUCION
+=======================
+
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread solucion/worker_threads.cpp -o worker_threads
+g++ -std=c++17 -Wall -Wextra -pedantic -pthread solucion/proceso_a.cpp -o proceso_a
+./proceso_a

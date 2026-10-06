@@ -1,0 +1,12 @@
+CONTROL SIMULADO 03 - LOCK_GUARD + THROW + CATCH
+================================================
+
+Se tienen 10 threads. Cada thread recibe un entero 1..10.
+
+- Una función validar() debe lanzar std::runtime_error si el número es impar.
+- La sección crítica debe estar protegida con std::lock_guard<std::mutex>.
+- La excepción debe escapar de validar() y ser capturada en el worker.
+- Demuestre mediante el código que el mutex no queda bloqueado cuando ocurre la excepción.
+- Todos los threads deben finalizar mediante join().
+
+Pregunta teórica: explique por qué lock_guard resulta más seguro que llamar lock()/unlock() manualmente en este caso.

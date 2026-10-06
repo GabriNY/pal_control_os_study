@@ -1,0 +1,22 @@
+CONTROL SIMULADO 06 - SIGNAL + PIPE + EXECV + DETACH + CONDITION_VARIABLE
+========================================================================
+
+Se tienen dos ejecutables: `coordinador` y `detached_worker`.
+
+Coordinador:
+- crea un pipe y un hijo mediante fork().
+- el hijo hace dup2(pipe_read, STDIN_FILENO) y execv("./detached_worker").
+- el padre registra SIGUSR1.
+- permanece esperando señales.
+- cuando llega SIGUSR1, escribe el valor 5 por el pipe y cierra el extremo de escritura.
+- espera la terminación del hijo.
+
+Detached_worker:
+- lee N desde STDIN.
+- crea N threads y llama detach() sobre todos.
+- NO puede usar sleep() como forma de sincronización.
+- cada detached thread incrementa `finalizados` bajo mutex.
+- main espera con condition_variable hasta que finalizados == N y solo entonces termina.
+
+Comando esperado desde otra terminal:
+kill -USR1 <PID_COORDINADOR>
