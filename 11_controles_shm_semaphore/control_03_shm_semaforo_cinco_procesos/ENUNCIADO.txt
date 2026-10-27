@@ -1,0 +1,18 @@
+CONTROL SIMULADO 03 - SHARED MEMORY + SEMAPHORE + 5 PROCESOS
+
+Diseñe una solución con exactamente cinco procesos totales: A, B, C, D y E.
+
+- A es el padre/coordinador.
+- A crea una memoria compartida que contiene un contador entero inicializado en 0.
+- A crea un semáforo binario inicializado en 1.
+- A crea mediante fork() a B, C, D y E.
+- Cada hijo incrementa 5000 veces el contador compartido.
+- Cada incremento debe encontrarse protegido por P()/V().
+- A espera a todos sus hijos y muestra el resultado final.
+- A elimina la SHM y el semáforo.
+
+Preguntas de sustentación:
+1. ¿Qué ocurriría si se retiran P y V?
+2. ¿Por qué el contador debe estar en SHM y no en una variable normal?
+3. ¿Cuántas veces se ejecuta fork() en el padre?
+4. ¿Cuál debe ser el contador final?

@@ -1,0 +1,90 @@
+============================================================
+NUEVA ETAPA - SISTEMAS OPERATIVOS
+SHARED MEMORY + SEMAPHORE (SYSTEM V)
+============================================================
+
+ORDEN DE ESTUDIO
+
+1. Shared Memory básica:
+   shmget -> shmat -> leer/escribir -> shmdt -> shmctl IPC_RMID
+
+2. Semaphore básico:
+   semget -> semctl SETVAL -> semop P(-1) / V(+1) -> semctl IPC_RMID
+
+3. Juntos con dos procesos:
+   SHM = datos
+   SEM = protección de la SHM
+
+4. Juntos con fork y 3 procesos.
+
+5. Juntos con 5 procesos totales.
+
+6. Set de semáforos para controlar turnos exactos.
+
+7. Integración con SIGUSR1.
+
+8. Integración con fork + execv.
+
+9. Integración con Message Queue.
+
+============================================================
+COMANDOS QUE DEBES SABER
+============================================================
+
+ipcs
+ipcs -m
+ipcs -s
+ipcs -q
+ipcrm -m SHMID
+ipcrm -s SEMID
+
+Compilar C:
+gcc -std=c11 -Wall -Wextra -pedantic archivo.c -o programa
+
+Ver procesos:
+ps -ef
+pgrep programa
+
+Enviar señal:
+kill -USR1 PID
+
+============================================================
+PREGUNTAS TIPICAS DEL CONTROL
+============================================================
+
+- Diferencia entre key e ID (shmid/semid).
+- Diferencia entre shmget y shmat.
+- Qué hace shmdt.
+- Qué hace IPC_RMID.
+- Qué significa inicializar un semáforo en 1 o en 0.
+- Qué hace P(-1).
+- Qué hace V(+1).
+- Qué ocurre si dos procesos modifican SHM sin semáforo.
+- Por qué una variable normal después de fork no sirve como contador común.
+- Cómo crear 5 procesos sin crear una explosión de forks.
+- Cuándo debe limpiar los recursos el padre.
+- Cómo comprobar IPC desde terminal usando ipcs.
+
+============================================================
+ESTRUCTURA NUEVA DEL REPO
+============================================================
+
+10_shared_memory_semaphores/
+    00_labs_usuario_revisados/
+    01_shared_memory_basica/
+    02_semaphore_basico/
+    03_shm_sem_dos_procesos/
+    04_shm_sem_tres_procesos/
+    05_shm_sem_cinco_procesos/
+    06_shm_sem_turnos_cinco_procesos/
+    07_shm_sem_signal_inicio/
+    08_shm_sem_fork_execv/
+
+11_controles_shm_semaphore/
+    control_01_shared_memory_servidor_cliente/
+    control_02_semaforo_exclusion_mutua/
+    control_03_shm_semaforo_cinco_procesos/
+    control_04_shm_set_semaforos_turnos/
+    control_05_signal_shm_semaforo_cinco_procesos/
+    control_06_fork_execv_shm_semaforo/
+    control_07_shm_semaforo_message_queue/

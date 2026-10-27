@@ -1,0 +1,14 @@
+CONTROL SIMULADO 05 - SIGNAL + SHM + SEMAPHORE
+
+Construya un proceso padre A y cuatro hijos B,C,D,E.
+
+- A crea SHM con un contador=0.
+- A crea un conjunto de 2 semáforos: INICIO=0 y MUTEX=1.
+- B,C,D,E quedan bloqueados ejecutando P(INICIO).
+- A registra un handler para SIGUSR1 y espera pasivamente.
+- Desde otra terminal se envía: kill -USR1 <PID_A>
+- al recibir la señal, A ejecuta cuatro operaciones V(INICIO);
+- cada hijo continúa, entra con P(MUTEX), incrementa el contador compartido y sale con V(MUTEX);
+- A espera a todos, imprime contador final y elimina los IPC.
+
+Explique la diferencia entre la señal que despierta al padre y el semáforo que despierta a los hijos.

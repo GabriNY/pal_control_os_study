@@ -1,0 +1,144 @@
+============================================================
+ANALISIS DE LOS 4 LABORATORIOS NUEVOS
+============================================================
+
+1) 05.1 shm_server.c -> versión revisada:
+   00_labs_usuario_revisados/01_shm_servidor_alfabeto.c
+
+FLUJO:
+    key=5678
+       |
+       v
+    shmget(key, 27, IPC_CREAT|0666)
+       |
+       v
+    shmat()
+       |
+       v
+    escribe abcdefghijklmnopqrstuvwxyz\0
+       |
+       v
+    espera while (*shm != '*')
+       |
+       v
+    cliente escribe '*'
+       |
+       v
+    servidor termina
+
+En el original, la confirmación se hace únicamente cambiando el primer
+carácter. Esto es una sincronización artesanal mediante polling; todavía no
+utiliza un semáforo.
+
+2) 05.2 shm_client.c -> versión revisada:
+   00_labs_usuario_revisados/02_shm_cliente_lector.c
+
+FLUJO:
+    shmget(5678, 27, 0666)   <- no crea, busca lo que creó el servidor
+       |
+       v
+    shmat()
+       |
+       v
+    lee hasta '\0'
+       |
+       v
+    *shm='*'
+
+IMPORTANTE: servidor y cliente deben usar la MISMA KEY y el mismo tamaño.
+
+3) 11_semaphoreinit.c -> versión revisada:
+   00_labs_usuario_revisados/03_semaforo_inicializador.c
+
+FLUJO:
+    key=0x4444
+       |
+       v
+    semget(key, 1, IPC_CREAT|0666)
+       |
+       v
+    semctl(semid, 0, SETVAL, 1)
+
+El valor 1 representa un recurso disponible. El siguiente P(-1) lo cambia a 0.
+
+4) 11_Semaphore.c -> versión revisada:
+   00_labs_usuario_revisados/04_semaforo_exclusion_mutua_argumentos.c
+
+P = semop(-1):
+    si sem=1 -> pasa a 0 y entra.
+    si sem=0 -> el proceso queda bloqueado.
+
+V = semop(+1):
+    libera el recurso y puede despertar a otro proceso bloqueado.
+
+MUY IMPORTANTE SOBRE TUS ARCHIVOS ORIGINALES
+---------------------------------------------
+
+`11_semaphoreinit.c` usa key 0x4444.
+`11_Semaphore.c` usa key 0x1111.
+
+Por lo tanto NO están conectados al mismo conjunto de semáforos tal como fueron
+subidos. Si el profesor pregunta por qué `./semaphore g ...` no encuentra el
+semaforo creado por el inicializador, esta diferencia de KEY es la primera cosa
+que debes revisar.
+
+OTRAS CORRECCIONES DIDACTICAS APLICADAS
+---------------------------------------
+
+- `main()` -> `int main(void)` / `int main(int argc, char *argv[])`.
+- se añadieron headers para exit(), sleep(), etc.
+- `NULL` usado como fin de cadena -> '\0'.
+- se añadió validación de argc antes de usar argv[1] y argv[2].
+- `perror("semop p")` en la operación V se cambió por `semop V`.
+- se añadieron shmdt() y eliminación de IPC al finalizar los ejemplos nuevos.
+
+============================================================
+COMO SE JUNTAN SHARED MEMORY + SEMAPHORE
+============================================================
+
+Sin semáforo:
+
+Proceso B ----+
+              +-----> contador en SHM
+Proceso C ----+
+
+Ambos pueden leer el mismo valor y pisarse.
+
+Con semáforo:
+
+Proceso B -> P() -> [contador en SHM] -> V()
+Proceso C -> P() -> [contador en SHM] -> V()
+
+Solo uno entra a la sección crítica por vez.
+
+============================================================
+POSIBLE CONTROL DE 5 PROCESOS
+============================================================
+
+A (padre/coordinador)
+|-- B
+|-- C
+|-- D
+`-- E
+
+Total: 5 procesos.
+
+A crea:
+- SHM contador=0
+- SEM valor=1
+
+B,C,D,E:
+- P()
+- contador++
+- V()
+
+A:
+- wait() x4
+- muestra contador
+- shmctl(IPC_RMID)
+- semctl(IPC_RMID)
+
+Este patrón está implementado en:
+10_shared_memory_semaphores/05_shm_sem_cinco_procesos/
+y como control en:
+11_controles_shm_semaphore/control_03_shm_semaforo_cinco_procesos/

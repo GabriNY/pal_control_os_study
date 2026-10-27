@@ -1,0 +1,9 @@
+cd solucion
+
+gcc -std=c11 -Wall -Wextra -pedantic worker_shm_sem.c -o worker_shm_sem
+gcc -std=c11 -Wall -Wextra -pedantic coordinador.c -o coordinador
+
+./coordinador
+
+IMPORTANTE: compilar primero worker_shm_sem porque coordinador lo busca con execv().
+Esperado: cuatro workers y contador final=4.

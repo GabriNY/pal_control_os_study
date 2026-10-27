@@ -1,0 +1,16 @@
+CONTROL SIMULADO 07 - SHM + SEMAPHORE + MESSAGE QUEUE
+
+Diseñe A como coordinador y cuatro procesos trabajadores B,C,D,E.
+
+- A crea una SHM con contador=0.
+- A crea un semáforo binario=1 para proteger el contador.
+- A crea una Message Queue.
+- A crea cuatro hijos con fork().
+- Cada hijo entra con P(), incrementa el contador compartido, copia el valor obtenido y sale con V().
+- Luego cada hijo envía a A un mensaje por la cola con su PID y el valor del contador que observó.
+- A recibe cuatro mensajes, los imprime, espera a todos los hijos y elimina SHM, SEM y MQ.
+
+Se evalúa que el estudiante distinga:
+- SHM = estado compartido;
+- semaphore = exclusión mutua;
+- MQ = transporte de eventos/resultados.

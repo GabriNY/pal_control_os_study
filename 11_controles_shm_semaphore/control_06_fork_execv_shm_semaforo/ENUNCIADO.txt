@@ -1,0 +1,12 @@
+CONTROL SIMULADO 06 - FORK + EXECV + SHARED MEMORY + SEMAPHORE
+
+Proceso A debe:
+- crear una SHM con contador=0;
+- crear un semáforo binario=1;
+- realizar cuatro fork();
+- cada hijo debe reemplazarse con execv("./worker_shm_sem", ...);
+- cada worker, ya después del execv, debe localizar la SHM y el semáforo por key;
+- ejecutar P(), incrementar el contador, imprimir PID y resultado, ejecutar V();
+- A usa wait() para esperar los cuatro workers y elimina los recursos.
+
+El objetivo es demostrar que un programa ejecutado mediante execv puede volver a localizar IPC System V usando sus keys, sin depender de heredar un puntero de shmat().

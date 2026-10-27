@@ -1,0 +1,10 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic semaforo_argumentos.c -o semaforo
+
+Terminal 1: ./semaforo c ABCDE
+Terminal 2: ./semaforo g 12345
+Terminal 3: ./semaforo g xyz
+
+Luego:
+ipcs -s
+ipcrm -s SEMID

@@ -1,0 +1,77 @@
+============================================================
+COMANDOS IPC - SYSTEM V
+============================================================
+
+1) VER TODOS LOS RECURSOS IPC
+
+    ipcs
+
+2) SOLO MEMORIA COMPARTIDA
+
+    ipcs -m
+
+Columnas importantes:
+    key     -> clave usada por shmget()
+    shmid   -> identificador real asignado por el kernel
+    owner   -> propietario
+    bytes   -> tamaño
+    nattch  -> número de procesos actualmente adjuntos
+
+3) SOLO SEMAFOROS
+
+    ipcs -s
+
+Columnas importantes:
+    key     -> clave usada por semget()
+    semid   -> identificador del conjunto
+    nsems   -> número de semáforos dentro del conjunto
+
+4) SOLO MESSAGE QUEUES
+
+    ipcs -q
+
+5) ELIMINAR MEMORIA COMPARTIDA POR ID
+
+    ipcrm -m SHMID
+
+Ejemplo:
+    ipcrm -m 12
+
+6) ELIMINAR SEMAFORO POR ID
+
+    ipcrm -s SEMID
+
+Ejemplo:
+    ipcrm -s 8
+
+7) COMPILACION BASE
+
+    gcc -std=c11 -Wall -Wextra -pedantic archivo.c -o programa
+
+No necesitas -pthread para semáforos System V ni para shared memory System V.
+
+8) PATRON DE DEPURACION
+
+Antes de ejecutar:
+    ipcs -m
+    ipcs -s
+
+Mientras el programa está corriendo:
+    ipcs -m
+    ipcs -s
+
+Después:
+    ipcs -m
+    ipcs -s
+
+Si un programa termina mal y deja recursos:
+    ipcrm -m <shmid>
+    ipcrm -s <semid>
+
+9) DIFERENCIA CLAVE
+
+shmget()/shmat()  -> compartir DATOS.
+semget()/semop()  -> SINCRONIZAR acceso a esos datos.
+
+Un semáforo no transporta el mensaje.
+La memoria compartida no evita por sí sola que dos procesos escriban al mismo tiempo.

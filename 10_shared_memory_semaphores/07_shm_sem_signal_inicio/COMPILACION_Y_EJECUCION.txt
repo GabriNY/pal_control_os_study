@@ -1,0 +1,15 @@
+gcc -std=c11 -Wall -Wextra -pedantic signal_libera_trabajadores.c -o signal_shm_sem
+
+Terminal 1:
+    ./signal_shm_sem
+
+Anota el PID que imprime.
+Terminal 2:
+    kill -USR1 PID
+
+El padre crea 4 hijos bloqueados en P().
+SIGUSR1 activa al padre.
+El padre hace cuatro V(), permitiendo continuar a los cuatro hijos.
+La SHM almacena el contador final.
+
+Se usan 2 semáforos: INICIO=0 como compuerta y MUTEX=1 para proteger la SHM.

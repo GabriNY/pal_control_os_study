@@ -1,0 +1,48 @@
+MAPA DE ESTUDIO - SHARED MEMORY + SEMAPHORES
+
+NIVEL 1: SHARED MEMORY
+    shmget() -> obtiene/crea ID
+    shmat()  -> adjunta
+    memoria  -> leer/escribir
+    shmdt()  -> separa
+    shmctl(IPC_RMID) -> elimina
+
+NIVEL 2: SEMAPHORE
+    semget() -> obtiene/crea set
+    semctl(SETVAL/SETALL) -> inicializa
+    semop(-1) -> P / wait / down
+    semop(+1) -> V / signal / up
+    semctl(IPC_RMID) -> elimina
+
+NIVEL 3: SHM + SEM
+    P(mutex)
+       modificar SHM
+    V(mutex)
+
+NIVEL 4: fork + 3 procesos
+    A -> B,C
+    B y C comparten SHM y SEM
+
+NIVEL 5: 5 procesos totales
+    A -> B,C,D,E
+    todos comparten recursos System V
+
+NIVEL 6: set de semáforos
+    S0=1 S1=0 S2=0 S3=0 S4=0
+    A -> B -> C -> D -> E
+
+NIVEL 7: signal
+    SIGUSR1 despierta a A
+    A hace V(INICIO) x4
+    hijos protegen SHM con MUTEX
+
+NIVEL 8: execv
+    A crea IPC
+    fork
+    hijo execv(worker)
+    worker usa las mismas keys para recuperar IPC
+
+NIVEL 9: Message Queue
+    SHM = estado
+    SEM = sincronización
+    MQ  = mensajes/eventos

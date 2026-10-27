@@ -1,0 +1,18 @@
+CONTROL SIMULADO 01 - SHARED MEMORY
+
+Diseñe dos procesos independientes A y B.
+
+Proceso A:
+- crea un segmento de memoria compartida System V;
+- escribe una cadena alfabética en el segmento;
+- imprime SHMID y PID;
+- queda esperando hasta que B confirme la lectura modificando un campo de la memoria.
+
+Proceso B:
+- localiza el segmento usando la misma key;
+- se adjunta con shmat();
+- imprime el contenido;
+- modifica el campo de confirmación.
+
+Se debe demostrar el recurso con `ipcs -m` y eliminarlo al finalizar.
+Explique shmget(), shmat(), shmdt() y shmctl(...IPC_RMID...).

@@ -1,0 +1,14 @@
+CONTROL SIMULADO 04 - CINCO PROCESOS EN ORDEN
+
+Implemente cinco procesos A,B,C,D,E que deben escribir en una memoria compartida exactamente en ese orden.
+
+Requisitos:
+- usar una SHM para almacenar una cadena resultado;
+- usar un conjunto de 5 semáforos System V;
+- valores iniciales: [1,0,0,0,0];
+- A espera S0, escribe 'A' y libera S1;
+- B espera S1, escribe 'B' y libera S2;
+- continuar hasta E;
+- el padre muestra la cadena final ABCDE y elimina los recursos.
+
+No se permite resolver el orden mediante sleep().

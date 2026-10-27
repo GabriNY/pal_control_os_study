@@ -1,0 +1,139 @@
+========================================================================
+control_01_shared_memory_servidor_cliente
+========================================================================
+
+CONTROL SIMULADO 01 - SHARED MEMORY
+
+Diseñe dos procesos independientes A y B.
+
+Proceso A:
+- crea un segmento de memoria compartida System V;
+- escribe una cadena alfabética en el segmento;
+- imprime SHMID y PID;
+- queda esperando hasta que B confirme la lectura modificando un campo de la memoria.
+
+Proceso B:
+- localiza el segmento usando la misma key;
+- se adjunta con shmat();
+- imprime el contenido;
+- modifica el campo de confirmación.
+
+Se debe demostrar el recurso con `ipcs -m` y eliminarlo al finalizar.
+Explique shmget(), shmat(), shmdt() y shmctl(...IPC_RMID...).
+
+========================================================================
+control_02_semaforo_exclusion_mutua
+========================================================================
+
+CONTROL SIMULADO 02 - SEMAFORO / EXCLUSION MUTUA
+
+Implemente un programa que pueda ejecutarse simultáneamente en tres terminales.
+La primera instancia debe crear e inicializar un semáforo System V con valor 1.
+Las otras instancias deben obtener el mismo semáforo.
+
+Cada proceso recibe una cadena por argv y, para cada carácter:
+1. ejecuta P();
+2. imprime el carácter dos veces;
+3. ejecuta V().
+
+El objetivo es demostrar que la sección crítica no es ejecutada simultáneamente.
+Mostrar el semáforo con `ipcs -s`.
+
+========================================================================
+control_03_shm_semaforo_cinco_procesos
+========================================================================
+
+CONTROL SIMULADO 03 - SHARED MEMORY + SEMAPHORE + 5 PROCESOS
+
+Diseñe una solución con exactamente cinco procesos totales: A, B, C, D y E.
+
+- A es el padre/coordinador.
+- A crea una memoria compartida que contiene un contador entero inicializado en 0.
+- A crea un semáforo binario inicializado en 1.
+- A crea mediante fork() a B, C, D y E.
+- Cada hijo incrementa 5000 veces el contador compartido.
+- Cada incremento debe encontrarse protegido por P()/V().
+- A espera a todos sus hijos y muestra el resultado final.
+- A elimina la SHM y el semáforo.
+
+Preguntas de sustentación:
+1. ¿Qué ocurriría si se retiran P y V?
+2. ¿Por qué el contador debe estar en SHM y no en una variable normal?
+3. ¿Cuántas veces se ejecuta fork() en el padre?
+4. ¿Cuál debe ser el contador final?
+
+========================================================================
+control_04_shm_set_semaforos_turnos
+========================================================================
+
+CONTROL SIMULADO 04 - CINCO PROCESOS EN ORDEN
+
+Implemente cinco procesos A,B,C,D,E que deben escribir en una memoria compartida exactamente en ese orden.
+
+Requisitos:
+- usar una SHM para almacenar una cadena resultado;
+- usar un conjunto de 5 semáforos System V;
+- valores iniciales: [1,0,0,0,0];
+- A espera S0, escribe 'A' y libera S1;
+- B espera S1, escribe 'B' y libera S2;
+- continuar hasta E;
+- el padre muestra la cadena final ABCDE y elimina los recursos.
+
+No se permite resolver el orden mediante sleep().
+
+========================================================================
+control_05_signal_shm_semaforo_cinco_procesos
+========================================================================
+
+CONTROL SIMULADO 05 - SIGNAL + SHM + SEMAPHORE
+
+Construya un proceso padre A y cuatro hijos B,C,D,E.
+
+- A crea SHM con un contador=0.
+- A crea un conjunto de 2 semáforos: INICIO=0 y MUTEX=1.
+- B,C,D,E quedan bloqueados ejecutando P(INICIO).
+- A registra un handler para SIGUSR1 y espera pasivamente.
+- Desde otra terminal se envía: kill -USR1 <PID_A>
+- al recibir la señal, A ejecuta cuatro operaciones V(INICIO);
+- cada hijo continúa, entra con P(MUTEX), incrementa el contador compartido y sale con V(MUTEX);
+- A espera a todos, imprime contador final y elimina los IPC.
+
+Explique la diferencia entre la señal que despierta al padre y el semáforo que despierta a los hijos.
+
+========================================================================
+control_06_fork_execv_shm_semaforo
+========================================================================
+
+CONTROL SIMULADO 06 - FORK + EXECV + SHARED MEMORY + SEMAPHORE
+
+Proceso A debe:
+- crear una SHM con contador=0;
+- crear un semáforo binario=1;
+- realizar cuatro fork();
+- cada hijo debe reemplazarse con execv("./worker_shm_sem", ...);
+- cada worker, ya después del execv, debe localizar la SHM y el semáforo por key;
+- ejecutar P(), incrementar el contador, imprimir PID y resultado, ejecutar V();
+- A usa wait() para esperar los cuatro workers y elimina los recursos.
+
+El objetivo es demostrar que un programa ejecutado mediante execv puede volver a localizar IPC System V usando sus keys, sin depender de heredar un puntero de shmat().
+
+========================================================================
+control_07_shm_semaforo_message_queue
+========================================================================
+
+CONTROL SIMULADO 07 - SHM + SEMAPHORE + MESSAGE QUEUE
+
+Diseñe A como coordinador y cuatro procesos trabajadores B,C,D,E.
+
+- A crea una SHM con contador=0.
+- A crea un semáforo binario=1 para proteger el contador.
+- A crea una Message Queue.
+- A crea cuatro hijos con fork().
+- Cada hijo entra con P(), incrementa el contador compartido, copia el valor obtenido y sale con V().
+- Luego cada hijo envía a A un mensaje por la cola con su PID y el valor del contador que observó.
+- A recibe cuatro mensajes, los imprime, espera a todos los hijos y elimina SHM, SEM y MQ.
+
+Se evalúa que el estudiante distinga:
+- SHM = estado compartido;
+- semaphore = exclusión mutua;
+- MQ = transporte de eventos/resultados.

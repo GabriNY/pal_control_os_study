@@ -1,0 +1,8 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic turnos_abcde.c -o control04
+./control04
+
+Esperado: ABCDE.
+La sincronización debe depender de semop(), no de sleep().
+
+Arquitectura exacta: Padre A + cuatro hijos B,C,D,E = 5 procesos totales.

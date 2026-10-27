@@ -1,0 +1,14 @@
+gcc -std=c11 -Wall -Wextra -pedantic contador_compartido_cinco_procesos.c -o cinco_procesos
+./cinco_procesos
+
+Arquitectura:
+A (padre)
+|- B
+|- C
+|- D
+`- E
+
+Total = 5 procesos.
+B,C,D,E incrementan la misma variable de SHM.
+Un único semáforo con valor 1 actúa como mutex entre procesos.
+Resultado esperado = 4 * 5000 = 20000.

@@ -1,0 +1,8 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic cinco_procesos.c -o control03
+./control03
+
+Esperado: contador final=20000.
+Durante la ejecución puedes usar en otra terminal:
+    ipcs -m
+    ipcs -s

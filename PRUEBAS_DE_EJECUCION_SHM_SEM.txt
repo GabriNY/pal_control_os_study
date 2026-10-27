@@ -1,0 +1,57 @@
+PRUEBAS REALES DE LA ETAPA SHARED MEMORY + SEMAPHORES
+=====================================================
+
+[1] Shared Memory servidor/cliente
+[cliente] contenido: abcdefghijklmnopqrstuvwxyz
+[servidor PID=2371] SHMID=17, esperando al cliente...
+[servidor] confirmacion recibida.
+
+[2] SHM + SEM con dos procesos
+[cliente] modificación terminada.
+[coordinador] SHMID=18 SEMID=15. Ejecute ./cliente
+[coordinador] contador=1 mensaje='Cliente PID 2386 modifico la memoria'
+
+[3] Padre + 2 hijos = 3 procesos totales
+[hijo 2 PID=2394] termine
+[hijo 1 PID=2393] termine
+[padre PID=2392] contador final=2000 esperado=2000
+
+[4] Padre A + B,C,D,E = 5 procesos totales
+[A padre PID=2400] crea 4 hijos => 5 procesos totales
+[proceso B PID=2401] listo
+[proceso D PID=2403] listo
+[proceso C PID=2402] listo
+[proceso E PID=2404] listo
+[A] contador final=20000; esperado=20000
+
+[5] Cinco procesos en orden ABCDE con set de semaforos
+[proceso A PID=2410] orden parcial=A
+[proceso B PID=2411] orden parcial=AB
+[proceso C PID=2412] orden parcial=ABC
+[proceso D PID=2413] orden parcial=ABCD
+[proceso E PID=2414] orden parcial=ABCDE
+[A coordinador] orden final=ABCDE
+
+[6] SIGUSR1 + SHM + SEM
+[padre PID=2420] envia desde otra terminal: kill -USR1 2420
+[hijo PID=2423] contador=1
+[hijo PID=2422] contador=2
+[hijo PID=2424] contador=3
+[hijo PID=2425] contador=4
+[padre] contador final=4
+
+[7] fork + execv + SHM + SEM
+[worker 0 PID=2437] contador=1
+[worker 3 PID=2440] contador=2
+[worker 2 PID=2439] contador=3
+[worker 1 PID=2438] contador=4
+[coordinador] contador final=4 esperado=4
+
+[8] SHM + SEM + Message Queue
+[A] mensaje de PID=2448: contador observado=1
+[A] mensaje de PID=2449: contador observado=2
+[A] mensaje de PID=2450: contador observado=3
+[A] mensaje de PID=2451: contador observado=4
+[A] contador final en SHM=4
+
+Todas las pruebas finalizaron correctamente.

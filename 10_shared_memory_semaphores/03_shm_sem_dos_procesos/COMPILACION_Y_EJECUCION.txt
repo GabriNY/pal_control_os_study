@@ -1,0 +1,13 @@
+gcc -std=c11 -Wall -Wextra -pedantic coordinador_crea_recursos.c -o coordinador
+gcc -std=c11 -Wall -Wextra -pedantic cliente_modifica_bajo_semaforo.c -o cliente
+
+Terminal 1:
+    ./coordinador
+
+Terminal 2:
+    ipcs -m
+    ipcs -s
+    ./cliente
+
+Resultado esperado: contador=1 y mensaje del cliente.
+La SHM guarda los datos; el semáforo protege lectura/escritura.

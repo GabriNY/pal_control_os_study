@@ -1,0 +1,12 @@
+gcc -std=c11 -Wall -Wextra -pedantic servidor_crea_y_escribe.c -o servidor
+gcc -std=c11 -Wall -Wextra -pedantic cliente_lee_y_confirma.c -o cliente
+
+Terminal 1: ./servidor
+Terminal 2: ipcs -m
+Terminal 2: ./cliente
+Terminal 2: ipcs -m
+
+Flujo:
+servidor -> shmget(IPC_CREAT) -> shmat -> escribe a..z -> espera '*'
+cliente  -> shmget()          -> shmat -> lee       -> escribe '*'
+servidor -> detecta '*' -> shmdt -> IPC_RMID

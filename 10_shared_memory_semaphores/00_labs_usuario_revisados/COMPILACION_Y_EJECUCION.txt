@@ -1,0 +1,37 @@
+LABS REVISADOS
+
+A) SHARED MEMORY SERVIDOR/CLIENTE
+
+Compilar:
+    gcc -std=c11 -Wall -Wextra -pedantic 01_shm_servidor_alfabeto.c -o shm_servidor
+    gcc -std=c11 -Wall -Wextra -pedantic 02_shm_cliente_lector.c -o shm_cliente
+
+Terminal 1:
+    ./shm_servidor
+
+Terminal 2:
+    ipcs -m
+    ./shm_cliente
+
+El servidor debe finalizar después de que el cliente escriba '*'.
+
+B) SEMAFORO
+
+Compilar:
+    gcc -std=c11 -Wall -Wextra -pedantic 03_semaforo_inicializador.c -o sem_init
+    gcc -std=c11 -Wall -Wextra -pedantic 04_semaforo_exclusion_mutua_argumentos.c -o sem_demo
+
+Inicialización independiente:
+    ./sem_init
+    ipcs -s
+
+Para la demo con key 0x1111:
+Terminal 1:
+    ./sem_demo c ABCDEF
+
+Terminal 2 (mientras o después de iniciar la primera):
+    ./sem_demo g 123456
+
+Limpieza manual:
+    ipcs -s
+    ipcrm -s SEMID

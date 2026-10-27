@@ -1,0 +1,12 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic signal_inicia_trabajadores.c -o control05
+
+Terminal 1:
+    ./control05
+
+Terminal 2:
+    kill -USR1 PID_QUE_IMPRIMIO_EL_PROGRAMA
+
+Esperado: cuatro hijos terminan y contador final=4.
+
+Se usan 2 semáforos: INICIO=0 como compuerta y MUTEX=1 para proteger la SHM.

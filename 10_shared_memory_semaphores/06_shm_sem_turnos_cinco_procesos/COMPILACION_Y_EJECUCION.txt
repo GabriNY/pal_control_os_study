@@ -1,0 +1,14 @@
+gcc -std=c11 -Wall -Wextra -pedantic cinco_procesos_en_turnos.c -o turnos
+./turnos
+
+Se crea un set de 5 semáforos:
+S0=1, S1=0, S2=0, S3=0, S4=0.
+
+Proceso A hace P(S0), escribe A y V(S1).
+Proceso B hace P(S1), escribe B y V(S2).
+...
+Proceso E hace P(S4) y escribe E.
+
+La SHM almacena el resultado. Debe terminar como ABCDE.
+
+Arquitectura exacta: Padre A + cuatro hijos B,C,D,E = 5 procesos totales.

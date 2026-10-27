@@ -1,0 +1,7 @@
+gcc -std=c11 -Wall -Wextra -pedantic contador_compartido_tres_procesos.c -o tres_procesos
+./tres_procesos
+
+Padre + 2 hijos = 3 procesos totales.
+Cada hijo incrementa 1000 veces el mismo entero de SHM.
+P/V evita la condición de carrera.
+Resultado esperado: 2000.

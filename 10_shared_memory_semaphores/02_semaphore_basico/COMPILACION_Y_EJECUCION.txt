@@ -1,0 +1,12 @@
+gcc -std=c11 -Wall -Wextra -pedantic inicializar_semaforo.c -o sem_init
+gcc -std=c11 -Wall -Wextra -pedantic proteger_salida_con_semaforo.c -o sem_demo
+
+./sem_init
+ipcs -s
+
+Para sem_demo use su propia key 0x1111:
+Terminal 1: ./sem_demo c SISTEMAS
+Terminal 2: ./sem_demo g OPERATIVOS
+
+P = semop(-1): tomar/bloquear
+V = semop(+1): liberar/desbloquear

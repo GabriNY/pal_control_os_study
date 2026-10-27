@@ -1,0 +1,8 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic proceso_a_servidor.c -o proceso_a
+gcc -std=c11 -Wall -Wextra -pedantic proceso_b_cliente.c -o proceso_b
+
+Terminal 1: ./proceso_a
+Terminal 2: ipcs -m
+Terminal 2: ./proceso_b
+Terminal 2: ipcs -m

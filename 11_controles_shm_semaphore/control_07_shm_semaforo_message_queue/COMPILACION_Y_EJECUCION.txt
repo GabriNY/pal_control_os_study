@@ -1,0 +1,10 @@
+cd solucion
+gcc -std=c11 -Wall -Wextra -pedantic integracion_shm_sem_mq.c -o control07
+./control07
+
+Mientras corre, en otra terminal puedes observar:
+    ipcs -m
+    ipcs -s
+    ipcs -q
+
+Resultado final esperado: contador=4 y cuatro mensajes recibidos por A.

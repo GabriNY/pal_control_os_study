@@ -1,0 +1,12 @@
+gcc -std=c11 -Wall -Wextra -pedantic worker_shm_sem.c -o worker_shm_sem
+gcc -std=c11 -Wall -Wextra -pedantic coordinador_fork_execv.c -o coordinador
+./coordinador
+
+IMPORTANTE:
+worker_shm_sem debe compilarse primero porque execv("./worker_shm_sem", ...) lo necesita.
+No ejecutes worker manualmente en este ejercicio.
+
+Flujo:
+A crea SHM + SEM -> fork x4 -> cada hijo execv(worker)
+worker vuelve a localizar SHM + SEM por sus keys -> P -> incrementa -> V
+A espera con wait() -> imprime resultado -> elimina IPC.

@@ -1,0 +1,13 @@
+CONTROL SIMULADO 02 - SEMAFORO / EXCLUSION MUTUA
+
+Implemente un programa que pueda ejecutarse simultáneamente en tres terminales.
+La primera instancia debe crear e inicializar un semáforo System V con valor 1.
+Las otras instancias deben obtener el mismo semáforo.
+
+Cada proceso recibe una cadena por argv y, para cada carácter:
+1. ejecuta P();
+2. imprime el carácter dos veces;
+3. ejecuta V().
+
+El objetivo es demostrar que la sección crítica no es ejecutada simultáneamente.
+Mostrar el semáforo con `ipcs -s`.
